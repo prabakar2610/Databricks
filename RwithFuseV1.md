@@ -1,4 +1,4 @@
-# databricks
+# RwithFuseV1
 
 The file RwithFuseV1 can be used to build docker image with databricks standard runtime along with the support for R and Fuse v1.
 
