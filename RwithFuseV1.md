@@ -5,3 +5,19 @@ The file RwithFuseV1 can be used to build docker image with databricks standard 
 Note: Fusev1 used Python 2.7. 
 
 DEPRECATION: Python 2.7 reached the end of its life on January 1st, 2020. Please upgrade your Python as Python 2.7 is no longer maintained. pip 21.0 will drop support for Python 2.7 in January 2021. More details about Python 2 support in pip, can be found at https://pip.pypa.io/en/latest/development/release-process/#python-2-support
+
+### Supported Features
+  - Scala Notebooks
+  - Java/Jar jobs
+  - Python Notebooks, Python Jobs
+  - Spark Submit Jobs
+  - %sh
+  - DBFS FUSE mount (/dbfs)
+  - SSH
+  - R 
+
+### Unsupported Features
+  - Ganglia
+  
+### Standard Image
+  https://github.com/databricks/containers/tree/master/ubuntu/standard
