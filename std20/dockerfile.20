@@ -1,0 +1,57 @@
+FROM ubuntu:20.04 as builder
+
+RUN apt-get update 
+RUN apt-get install -y wget
+RUN apt-get install -y libdigest-sha-perl
+RUN apt-get install -y bzip2
+RUN apt-get install -y openjdk-8-jdk 
+RUN apt-get install -y iproute2 
+RUN apt-get install -y bash 
+RUN apt-get install -y sudo 
+RUN apt-get install -y coreutils 
+RUN apt-get install -y procps 
+RUN apt-get install -y fuse
+RUN apt-get install -y openssh-server \
+    && /var/lib/dpkg/info/ca-certificates-java.postinst configure \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN wget --quiet --output-document miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-py39_4.9.2-Linux-x86_64.sh \
+    && (echo 'b4e46fcc8029e2cfa731b788f25b1d36  miniconda.sh' | md5sum -c) \
+    && (echo '536817d1b14cb1ada88900f5be51ce0a5e042bae178b5550e62f61e223deae7c  miniconda.sh' | shasum -a 256 -c) \
+    # Conda must be installed at /databricks/conda
+    && /bin/bash miniconda.sh -b -p /databricks/conda \
+    && rm miniconda.sh
+
+FROM ubuntu:20.04
+
+COPY --from=builder /databricks/conda /databricks/conda
+COPY env.yml /databricks/.conda-env-def/env.yml
+RUN /databricks/conda/bin/conda env create --file /databricks/.conda-env-def/env.yml \
+    # Source conda.sh for all login shells.
+    && ln -s /databricks/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh
+
+# Conda recommends using strict channel priority speed up conda operations and reduce package incompatibility problems.
+# Set always_yes to avoid needing -y flags, and improve conda experience in Databricks notebooks.
+
+RUN /databricks/conda/bin/conda config --system --set channel_priority strict \
+    && /databricks/conda/bin/conda config --system --set always_yes True
+
+# This environment variable must be set to indicate the conda environment to activate.
+# Note that currently, we have to set both of these environment variables. The first one is necessary to indicate that this runtime supports conda.
+# The second one is necessary so that the python notebook/repl can be started (won't work without it)
+
+ENV DEFAULT_DATABRICKS_ROOT_CONDA_ENV=dcs-minimal
+ENV DATABRICKS_ROOT_CONDA_ENV=dcs-minimal
+
+# Make sure the USER env variable is set. The files exposed
+# by dbfs-fuse will be owned by this user.
+# Within the container, the USER is always root.
+
+ENV USER root
+
+# Warning: the created user has root permissions inside the container
+# Warning: you still need to start the ssh process with `sudo service ssh start`
+
+RUN useradd --create-home --shell /bin/bash --groups sudo ubuntu
+
