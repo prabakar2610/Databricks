@@ -1,0 +1,291 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                              ║
+║          DATABRICKS NOTEBOOK - QUICK START WITH GITHUB                       ║
+║                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+🎯 SIMPLEST METHOD (2 Steps)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Upload scripts to GitHub (public repo)
+2. In Databricks notebook, paste and run:
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ # Configure                                                                │
+│ DOMAINS_TO_TEST = [{"host": "api.internal.contoso.com", "port": 443}]     │
+│ PRIVATE_DNS_ZONE = "internal.contoso.com"                                  │
+│ NCC_DOMAIN = "internal.contoso.com"                                        │
+│ EXPECTED_PRIVATE_IP_PREFIX = "10.0"                                        │
+│                                                                             │
+│ # Download and run                                                          │
+│ import requests                                                             │
+│ exec(requests.get("https://raw.githubusercontent.com/USER/REPO/main/       │
+│      databricks_private_link_diagnostics_enhanced.py").text)               │
+└────────────────────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 SETUP STEPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Step 1: Create GitHub Repository
+─────────────────────────────────
+  1. Go to https://github.com
+  2. Click "New repository"
+  3. Name it (e.g., "databricks-pl-diagnostics")
+  4. Choose Public or Private
+  5. Click "Create repository"
+
+Step 2: Upload Files
+─────────────────────
+  Upload these files to your repo:
+  ✅ databricks_private_link_diagnostics_enhanced.py (main script)
+  ✅ run_diagnostics.py (optional wrapper)
+  ✅ README.md (optional documentation)
+
+Step 3: Get Raw URL
+─────────────────────
+  1. Click on the .py file in GitHub
+  2. Click "Raw" button (top right)
+  3. Copy the URL
+  4. Should look like:
+     https://raw.githubusercontent.com/username/repo/main/filename.py
+
+Step 4: Use in Databricks
+───────────────────────────
+  See examples below ⬇️
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📝 COPY-PASTE READY CODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Option A: Configuration in Notebook (Recommended)
+──────────────────────────────────────────────────
+
+# Cell 1: Configuration
+DOMAINS_TO_TEST = [
+    {"host": "api.internal.contoso.com", "port": 443, "description": "API HTTPS"},
+    {"host": "api.internal.contoso.com", "port": 80, "description": "API HTTP"},
+]
+PRIVATE_DNS_ZONE = "internal.contoso.com"
+NCC_DOMAIN = "internal.contoso.com"
+EXPECTED_PRIVATE_IP_PREFIX = "10.0"
+EXPECTED_LB_PRIVATE_IP = "10.0.1.100"  # Optional
+
+# Cell 2: Run Diagnostics
+import requests
+URL = "https://raw.githubusercontent.com/YOUR-USER/YOUR-REPO/main/databricks_private_link_diagnostics_enhanced.py"
+exec(requests.get(URL).text)
+
+───────────────────────────────────────────────────────────────────────────────
+
+Option B: One-Liner (Quickest)
+───────────────────────────────
+
+import requests; exec(requests.get("https://raw.githubusercontent.com/YOUR-USER/YOUR-REPO/main/run_diagnostics.py").text)
+
+Note: Requires updating run_diagnostics.py with your config first
+
+───────────────────────────────────────────────────────────────────────────────
+
+Option C: With Error Handling (Production)
+───────────────────────────────────────────
+
+import requests
+
+# Configuration
+DOMAINS_TO_TEST = [{"host": "api.internal.contoso.com", "port": 443}]
+PRIVATE_DNS_ZONE = "internal.contoso.com"
+NCC_DOMAIN = "internal.contoso.com"
+EXPECTED_PRIVATE_IP_PREFIX = "10.0"
+
+# Download and run
+URL = "https://raw.githubusercontent.com/YOUR-USER/YOUR-REPO/main/databricks_private_link_diagnostics_enhanced.py"
+print("📥 Downloading script...")
+
+try:
+    response = requests.get(URL, timeout=10)
+    response.raise_for_status()
+    print("✅ Download successful")
+    print("🚀 Running diagnostics...\n")
+    exec(response.text)
+except requests.exceptions.RequestException as e:
+    print(f"❌ Failed to download: {e}")
+except Exception as e:
+    print(f"❌ Error running script: {e}")
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔐 PRIVATE REPOSITORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If using a private GitHub repo:
+
+Step 1: Create GitHub Token
+────────────────────────────
+  1. Go to GitHub → Settings → Developer settings → Personal access tokens
+  2. Generate new token (classic)
+  3. Select scope: "repo" (full access)
+  4. Copy the token
+
+Step 2: Store in Databricks Secrets
+────────────────────────────────────
+  # In Databricks CLI or notebook:
+  databricks secrets create-scope --scope github
+  databricks secrets put --scope github --key token
+
+Step 3: Use in Notebook
+────────────────────────
+  import requests
+  
+  # Get token from secrets
+  GITHUB_TOKEN = dbutils.secrets.get(scope="github", key="token")
+  
+  # Configuration
+  DOMAINS_TO_TEST = [{"host": "api.internal.contoso.com", "port": 443}]
+  PRIVATE_DNS_ZONE = "internal.contoso.com"
+  NCC_DOMAIN = "internal.contoso.com"
+  EXPECTED_PRIVATE_IP_PREFIX = "10.0"
+  
+  # Download with authentication
+  URL = "https://raw.githubusercontent.com/YOUR-USER/PRIVATE-REPO/main/databricks_private_link_diagnostics_enhanced.py"
+  headers = {"Authorization": f"token {GITHUB_TOKEN}"}
+  response = requests.get(URL, headers=headers)
+  exec(response.text)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚙️ CONFIGURATION REFERENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Required Variables:
+───────────────────
+
+DOMAINS_TO_TEST = [
+    {"host": "FQDN", "port": PORT, "description": "Description"},
+]
+
+Examples:
+  {"host": "api.internal.contoso.com", "port": 443, "description": "API HTTPS"}
+  {"host": "db.internal.contoso.com", "port": 5432, "description": "PostgreSQL"}
+
+PRIVATE_DNS_ZONE = "internal.contoso.com"
+  # Zone suffix only, no protocol, no wildcards
+
+NCC_DOMAIN = "internal.contoso.com"
+  # Must match PRIVATE_DNS_ZONE exactly!
+
+EXPECTED_PRIVATE_IP_PREFIX = "10.0"
+  # First 2 octets of your VNet (e.g., "10.0" for 10.0.0.0/16)
+
+Optional Variables:
+──────────────────
+
+EXPECTED_LB_PRIVATE_IP = "10.0.1.100"  # or None
+DNS_RETRY_COUNT = 5
+TCP_RETRY_COUNT = 3
+CONNECTION_TIMEOUT = 5
+ENABLE_PORT_SCANNING = True
+ENABLE_MULTIPLE_RESOLUTION_TESTS = True
+ENABLE_LATENCY_ANALYSIS = True
+ENABLE_EXTERNAL_CONNECTIVITY_TEST = True
+ADDITIONAL_PORTS_TO_SCAN = [80, 443, 8080, 8443, 3306, 5432]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🐛 TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Error: "HTTP 404 Not Found"
+───────────────────────────
+  ✗ Wrong URL
+  ✗ Wrong branch name (try 'master' instead of 'main')
+  ✗ File doesn't exist in repo
+  
+  ✓ Check: Open the raw URL in your browser
+  ✓ Verify: You're using raw.githubusercontent.com
+
+Error: "HTTP 403 Forbidden"
+──────────────────────────
+  ✗ Private repo without authentication
+  
+  ✓ Add GitHub token (see Private Repository section above)
+  ✓ Or make repo public
+
+Error: "Name 'DOMAINS_TO_TEST' is not defined"
+──────────────────────────────────────────────
+  ✗ Configuration variables not set before exec()
+  
+  ✓ Set all required variables BEFORE the exec() line
+  ✓ Run configuration in same cell or previous cell
+
+Script downloads but nothing happens:
+─────────────────────────────────────
+  ✗ Variables might have wrong names
+  
+  ✓ Check variable names match exactly (case-sensitive)
+  ✓ Verify you set variables in the right scope
+
+GitHub caching issue (old version running):
+──────────────────────────────────────────
+  ✗ GitHub caches raw files for ~5 minutes
+  
+  ✓ Wait 5 minutes after updating file
+  ✓ Or add ?nocache=TIMESTAMP to URL
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 BEST PRACTICES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Use raw.githubusercontent.com URLs (not github.com)
+✅ Test with basic script first before enhanced
+✅ Keep configuration in notebook for easy changes
+✅ Use Databricks secrets for GitHub tokens
+✅ Version your GitHub repo (use tags/releases)
+✅ Document your configuration in notebook comments
+✅ Save JSON output after each run
+✅ Use public repos for non-sensitive configs
+
+❌ Don't hardcode credentials in notebooks
+❌ Don't use github.com URLs (won't work)
+❌ Don't forget to update configuration variables
+❌ Don't run on production without testing first
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 RECOMMENDED WORKFLOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Upload scripts to GitHub (one time)
+2. Create notebook with configuration cell (one time)
+3. Add download-and-run cell (one time)
+4. Run tests (as needed)
+5. Update configuration if needed (in notebook)
+6. Re-run tests
+7. Save JSON output for comparison
+
+Benefits:
+  ✓ No copy-pasting large scripts
+  ✓ Easy to share with team (just share GitHub URL)
+  ✓ Version controlled
+  ✓ Easy to update (update GitHub, re-run notebook)
+  ✓ Clean notebooks
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 ADDITIONAL RESOURCES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Documentation Files in Repo:
+  • START_HERE.md - Quick start guide
+  • NOTEBOOK_EXAMPLES.md - Detailed notebook examples
+  • TROUBLESHOOTING_FLOWCHART.md - Issue resolution guide
+  • CHEAT_SHEET.txt - Quick reference
+  • README.md - Complete documentation
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Version: 2.0
+Ready to use! 🚀

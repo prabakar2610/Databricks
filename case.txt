@@ -1,0 +1,384 @@
+ASK:
+
+The customer tried to connect Azure private link to resources behind a load balancer, the customer goes through [+this setup+|https://learn.microsoft.com/en-us/azure/databricks/security/network/serverless-network-security/pl-to-internal-network], they create a domain name, but whenever they do an nslookup to that domain name it resolves to a *public IP*, so they can't connect to their service.    What we did:  set up AZ VM in private VNET  It was listening on TCP:ip:port, firewall rules allowed traffic  Load balancer was created as per referenced article. Backend pool was created, with AZ instance as target. Target healthcheck was against traffic port. Target was shown healthy in LB config console  Private dns zone was created. AZ VM was given dedicated name in private zone.  Network connection config NCC was created in data bricks. Privatelink request was created in NCC and approved in private VNET side. It was shown as status Established. Private dns domain was configured in domains configuration portion of NCC.  Databricks notebook was created w python to determine name resolution and ip connectivity. Name resolution was resolving all existing private host records to same IP, probably network interface doing NAT in databricks side. No tcp connectivity was ever established. Connection attempts from notebook timed out. Load balancer never showed that anything was passing through it.  We tried both configuring entire domain in NCC config, and specific FQDN-s. No luck. We tried having all ports open to all. No luck. There is really not much opportunity to configure anything besides domain names and private link init on databricks side, so there is it, not a working solution to our experience.  ----  We also brought a Sr SA (David Poulet) to a call with them to go through their setup and test a few things live. We tested the connectivity to a private domain after setting the NCC using the private link resource id, the resolution of that domain was public instead of private. The troubleshooting documents suggest guides for when it refuses the resolution or when
+
+
+--------------------
+Responses from AI:
+-------------------
+
+The issue seems to revolve around your Azure Private Link setup, particularly with DNS resolution where it's returning a public IP instead of the expected private IP. Here are some crucial points to consider:
+
+- **DNS Resolution:** The troubleshooting you're experiencing may stem from how Azure handles DNS for Private Link. Specifically, it’s critical that the domain names used must resolve directly to the backend resources without any DNS chasing or redirection. Ensure that your private DNS zone correctly maps the private domain to the private IP address of your load balancer.
+
+- **Private DNS Configuration:** As you've noted that the resolution of the domain name always yields a public IP, verify that the private DNS zone is set up correctly and linked to the right virtual networks. The DNS settings must allow resolution to the private IPs assigned to your backend resources, ensuring no public fallback occurs.
+
+- **Health Probe Configuration:** Since you mentioned that the target health check was deemed healthy in the load balancer configuration, ensure that the health probe definitions are accurately monitoring the right ports and services on your Azure VM. The probe should match the protocol and path used by your applications.
+
+- **Network Connectivity Configuration (NCC):** Review the NCC settings in Databricks. Validate that the private link resource ID is correctly referenced and that the configurations related to backend pools and domain names adhere to the guidelines described in the setup documentation.
+
+- **Testing Connectivity:** When testing from Databricks, ensure that the networking configuration in your notebook allows outbound connections on required ports, and no firewall rules are blocking these connections.
+
+### Next Steps
+Double-check the private DNS and NCC configurations in detail, ensuring everything aligns with the setup documentation for Azure Private Link. 
+
+---
+
+Follow up as to AI: can you share some troubleshooting steps or commands that i can try in the customer environment?
+
+### Troubleshooting Azure Databricks Private Link DNS and Connectivity Issues
+
+Here are focused troubleshooting steps and commands to help diagnose problems with DNS resolution and private connectivity in your Azure Databricks Private Link setup, especially when the domain resolves to a public IP instead of a private one. These cover private DNS configuration, zone linkage, Databricks NCC and endpoint setup, and load balancer diagnostics.
+
+---
+
+#### 1. DNS Resolution Checks
+
+- Run NSLookup or Dig from different points in your network to verify which DNS path resolves the domain:
+
+```bash
+nslookup <your-domain>
+dig <your-domain>
+```
+- Run the above commands from:
+  - The Azure Databricks notebook (using Python subprocess or Databricks utilities)
+  - An Azure VM inside the target private VNet
+  - A host outside Azure (to validate public DNS vs. private DNS result)
+
+- Compare the returned IP addresses. The resolution from Databricks and the VM should yield the private IP of your load balancer frontend if configured correctly.
+
+---
+
+#### 2. Private DNS Zone Linkage Verification
+
+- In Azure Portal, navigate to your Private DNS Zone and check:
+  - The record set for `<your-domain>` points to the intended private IP.
+  - The private DNS zone is linked to the correct virtual networks (check under "Virtual network links").
+  - The link is set as "enabled" for auto-registration if applicable.
+
+- Use Azure CLI to check your DNS records and virtual network links:
+```bash
+az network private-dns zone show --name <your-zone> --resource-group <your-rg>
+az network private-dns record-set a list --zone-name <your-zone> --resource-group <your-rg>
+az network private-dns link vnet list --zone-name <your-zone> --resource-group <your-rg>
+```
+
+---
+
+#### 3. Load Balancer Diagnostics
+
+- Confirm health probe status:
+
+```bash
+az network lb probe show --resource-group <your-rg> --lb-name <your-lb> --name <your-probe>
+```
+
+- Confirm backend pool membership and rule configuration:
+
+```bash
+az network lb address-pool show --resource-group <your-rg> --lb-name <your-lb> --name <your-backend-pool>
+az network lb rule list --resource-group <your-rg> --lb-name <your-lb>
+```
+
+- Validate that the frontend IP configuration is set to an internal (VNet) IP, **not public**.
+
+---
+
+#### 4. Databricks NCC and Private Link Endpoint State
+
+- In Azure Databricks Account Console, ensure your NCC is tied to the correct workspace and region, and the private endpoint’s status shows **ESTABLISHED**.
+
+- Re-review the allowed domain names in the endpoint rule match exactly what you expect to resolve (no wildcards and no DNS redirects/chasing).
+
+---
+
+#### 5. End-to-End Connectivity and Port Test
+
+- From your Databricks notebook, run a Python connectivity test:
+
+```python
+import socket
+
+def test_connectivity(host, port):
+    try:
+        with socket.create_connection((host, port), timeout=5):
+            print("Connection successful")
+    except Exception as e:
+        print(f"Failed: {e}")
+
+test_connectivity('<your-domain>', <port>)
+```
+
+- If this fails, trace which firewall or NSG block might exist by reviewing Network Security Groups (NSGs) for both the Databricks VNet and your backend VNet.
+
+---
+
+#### 6. NCC Azure Resource ID and Domain Name Auditing
+
+- Double check the Azure Resource ID used in the NCC matches the Private Link service resource ID from Azure, as documented:
+
+```
+/subscriptions/<subscription-id>/resourceGroups/<resource-group-name>/providers/Microsoft.Network/privateLinkServices/<private-link-service-name>
+```
+- Ensure the domain names specified in the NCC are the **exact FQDNs** you want resolved via the private link.
+
+---
+
+#### 7. Review for DNS Chasing or Redirects
+
+- Note that DNS chasing/redirect (CNAME chains resolving beyond the initial label) are not supported. Make sure you do not use CNAMEs that ultimately resolve to a public IP—your DNS record in the private zone should **directly** point to the private frontend IP.
+
+---
+
+### Next Steps
+
+If public IPs continue to resolve:
+- Check for missing or misconfigured VNet links to your private DNS zone.
+- Remove public DNS records for the same FQDN to avoid fallback.
+- Add an explicit A record for your domain in the private DNS zone.
+
+
+---------------------------------------
+Response from Another AI:
+---------------------------------------
+
+Thank you for the detailed context. Based on your description, this is not a generic “misconfiguration” symptom — it points to a very specific failure mode in **Azure Databricks Serverless + Private Link to customer-managed internal services**. Below is a structured diagnosis and a concrete troubleshooting path.
+
+---
+
+## Executive summary
+
+If **DNS resolution from Databricks Serverless resolves to public IP instead of private IP**, then **Private Link is not being used at all**, regardless of whether:
+
+* NCC shows “Established”
+* Private endpoint was approved
+* Domains are configured
+* Load balancer is healthy
+
+This almost always means one of the following:
+
+1. The **Private DNS Zone is not correctly linked to the Private Endpoint**, or
+2. The **Private DNS Zone name does not match exactly what Databricks expects**, or
+3. The **Private Endpoint NIC is not registered in the zone**, or
+4. The **NCC domain configuration is incomplete or syntactically incorrect**, or
+5. The customer is unintentionally testing from a workspace that is **not actually using Serverless with that NCC**.
+
+---
+
+## How the architecture actually works (important nuance)
+
+In this pattern:
+
+Databricks Serverless → Microsoft-managed VNet → Private Endpoint → Customer VNet → ILB → Backend VM
+
+Databricks **does not resolve DNS using your VNet**.
+Instead, **Databricks injects DNS overrides internally** based on:
+
+* The **NCC domain configuration**
+* The **private endpoint + private DNS zone**
+* The **validated Private Link resource**
+
+If DNS is resolving publicly inside the notebook, then Databricks has **not accepted the domain as eligible for private routing**.
+
+---
+
+## High-confidence root cause
+
+From your symptoms:
+
+> "resolution of that domain was public instead of private"
+> "All private records resolved to same IP (likely Databricks NAT)"
+> "No traffic ever hits the load balancer"
+
+This is consistent with:
+
+> **Databricks did not associate the domain with the private endpoint.**
+
+In other words:
+The NCC says “Established” for the private link resource, but the **domain binding is failing silently**.
+
+This happens when:
+
+### ❌ Common mistake #1: Wrong DNS zone name
+
+The private DNS zone **must match exactly the FQDN suffix**.
+
+Example:
+
+* Service FQDN:
+  `api.internal.contoso.com`
+* Private DNS zone must be:
+  `internal.contoso.com`
+  (NOT `contoso.com`, NOT `privatelink.internal.contoso.com`)
+
+If this does not match exactly, Databricks will:
+
+* Accept the domain in NCC UI
+* But **not inject private routing**
+* And DNS will resolve publicly
+
+---
+
+## What to validate step-by-step
+
+### 1. On the Private Endpoint NIC
+
+Go to:
+
+> Private Endpoint → Network Interface → IP configuration
+
+You should see:
+
+* A private IP
+* And under DNS:
+
+  * A reference to the private DNS zone
+
+If you **do not see DNS zone associated here**, the private endpoint is not linked to DNS properly.
+
+---
+
+### 2. In the Private DNS Zone
+
+Check records:
+
+You must have either:
+
+* A-record:
+
+  ```
+  api.internal.contoso.com → 10.x.x.x
+  ```
+
+OR
+
+* Wildcard:
+
+  ```
+  *.internal.contoso.com → 10.x.x.x.x
+  ```
+
+If the record exists but resolution is still public from Databricks, then the failure is not DNS itself — it is **Databricks not honoring the domain**.
+
+---
+
+### 3. In NCC → Domains
+
+This is extremely sensitive.
+
+Correct:
+
+```
+internal.contoso.com
+```
+
+Wrong:
+
+```
+https://internal.contoso.com
+api.internal.contoso.com
+*.internal.contoso.com
+```
+
+Only the **zone**, no protocol, no wildcard, no host.
+
+---
+
+### 4. Confirm the workspace is actually using that NCC
+
+This is often overlooked.
+
+Check:
+Workspace → Settings → Network connectivity config
+
+If the workspace was created before NCC, or attached incorrectly, it will:
+
+* Show private link established
+* But **still egress publicly**
+
+A fast test:
+From notebook:
+
+```python
+import requests
+print(requests.get("https://ifconfig.me").text)
+```
+
+If IP belongs to Azure public Databricks ranges → NCC is not applied.
+
+---
+
+## Why everything looked "healthy" but still failed
+
+Azure side components can all be green:
+
+* LB healthy
+* Private endpoint approved
+* DNS zone created
+* VM reachable internally
+
+But Databricks will **only route traffic privately if all three match**:
+
+* Private Endpoint
+* Private DNS Zone
+* NCC domain suffix
+
+Any mismatch → silent fallback to public routing.
+
+---
+
+## Specific test that should work when fixed
+
+Once correctly configured:
+
+From Databricks notebook:
+
+```python
+import socket
+print(socket.gethostbyname("api.internal.contoso.com"))
+```
+
+Must return:
+
+```
+10.x.x.x   (private IP)
+```
+
+Then:
+
+```python
+import socket
+s = socket.socket()
+s.settimeout(3)
+s.connect(("api.internal.contoso.com", 443))
+print("Connected")
+```
+
+If DNS is private but TCP fails, only then does LB/backend become suspect.
+In your case, DNS never became private → upstream config issue.
+
+---
+
+## Blunt assessment
+
+> “There is really not much opportunity to configure anything besides domain names and private link init on databricks side”
+
+This is accurate — and unfortunately means:
+
+👉 **If the domain suffix does not exactly align with DNS + private endpoint, the entire solution fails silently.**
+
+This is a known pain point with this feature.
+
+---
+
+## If you want, I can help you pinpoint it precisely
+
+If you can share (sanitized):
+
+* Example FQDN used
+* Private DNS zone name
+* What you entered into NCC domains
+* Whether you used wildcard or explicit records
+
+I can tell you exactly where it is breaking.
+----------------------------------
