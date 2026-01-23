@@ -1,0 +1,339 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║     AZURE PRIVATE LINK TROUBLESHOOTING - QUICK START CHEAT SHEET          ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+📋 FILES IN THIS DIRECTORY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. databricks_private_link_diagnostics.py (Basic)
+2. databricks_private_link_diagnostics_enhanced.py (⭐ Use This)
+3. azure_vm_diagnostics.sh
+4. analyze_results.py
+5. README.md (Full documentation)
+6. TROUBLESHOOTING_FLOWCHART.md (Detailed troubleshooting)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚡ STEP 1: RUN DATABRICKS TEST (2 minutes)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Copy databricks_private_link_diagnostics_enhanced.py into Databricks notebook
+
+2. Update CONFIGURATION (lines 32-51):
+
+   DOMAINS_TO_TEST = [
+       {"host": "YOUR-SERVICE.YOUR-DOMAIN.com", "port": 443, "description": "My Service"},
+   ]
+   
+   PRIVATE_DNS_ZONE = "YOUR-DOMAIN.com"
+   NCC_DOMAIN = "YOUR-DOMAIN.com"
+   EXPECTED_PRIVATE_IP_PREFIX = "10.0"  # Your VNet range
+
+3. Run the cell
+
+4. Review output:
+   ✅ All Pass → You're good!
+   ❌ Public IP → Go to FIX #1 below
+   ❌ DNS Failed → Go to FIX #2 below
+   ❌ TCP Failed → Go to FIX #3 below
+
+5. Copy JSON output (at the end) for later use
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚡ STEP 2: RUN AZURE VM TEST (Optional - for comparison)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. SSH to Azure VM:
+   ssh username@your-vm-ip
+
+2. Upload script:
+   # From local machine:
+   scp azure_vm_diagnostics.sh username@your-vm-ip:~/
+
+3. Make executable and edit:
+   chmod +x azure_vm_diagnostics.sh
+   nano azure_vm_diagnostics.sh
+   
+   # Update CONFIGURATION section (lines 22-36)
+
+4. Run:
+   ./azure_vm_diagnostics.sh > results.txt 2>&1
+
+5. Download results:
+   # From local machine:
+   scp username@your-vm-ip:~/results.txt ./
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔥 FIX #1: PUBLIC IP RESOLVED (Most Common Issue)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Symptom: ❌ IP Type: PUBLIC IP - Private Link is NOT being used!
+
+MOST COMMON CAUSE: Private DNS Zone name ≠ NCC Domain name
+
+Quick Check:
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Private DNS Zone:  internal.contoso.com                                 │
+│ NCC Domain:        internal.contoso.com                                 │
+│                                                                          │
+│ Do they match EXACTLY? ✅ YES → Continue to next check                  │
+│                        ❌ NO  → THIS IS YOUR PROBLEM!                   │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Fix Steps:
+  1. Go to Databricks Account Console
+  2. Cloud Resources → Network Connectivity Configs
+  3. Edit your NCC
+  4. Update "Domain" to match Private DNS Zone EXACTLY
+     - No protocol (https://)
+     - No wildcards (*)
+     - No specific hostname
+     - Just the zone: internal.contoso.com
+  5. Save and wait 5-10 minutes
+  6. Restart Databricks cluster
+  7. Re-run test
+
+Other Checks (if DNS Zone = NCC Domain):
+  ☐ Verify A record exists:
+    az network private-dns record-set a list --zone-name <zone> --resource-group <rg>
+    
+  ☐ Verify VNet link:
+    az network private-dns link vnet list --zone-name <zone> --resource-group <rg>
+    
+  ☐ Verify Private Endpoint is "Established" (in Databricks console)
+  
+  ☐ Verify workspace is attached to NCC (Workspace Settings → Network)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔥 FIX #2: DNS RESOLUTION FAILED
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Symptom: ❌ DNS resolution failed
+
+Quick Fixes:
+
+1. Check DNS record exists:
+   az network private-dns record-set a list \
+     --zone-name <your-zone> \
+     --resource-group <your-rg>
+   
+   If missing, add it:
+   az network private-dns record-set a add-record \
+     --resource-group <your-rg> \
+     --zone-name <your-zone> \
+     --record-set-name <hostname> \
+     --ipv4-address <lb-private-ip>
+
+2. Check for typos in domain name
+
+3. Verify Private DNS Zone exists:
+   az network private-dns zone show \
+     --name <your-zone> \
+     --resource-group <your-rg>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔥 FIX #3: TCP CONNECTION FAILED (But DNS works)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Symptom: ✅ DNS → Private IP, but ❌ TCP connection fails
+
+Good News: Private Link DNS is working!
+Issue: Backend/Load Balancer problem
+
+Quick Checks:
+
+1. Check Load Balancer health:
+   az network lb show --name <lb-name> --resource-group <rg>
+   
+   Or: Azure Portal → Load Balancer → Backend Pools → Check health status
+
+2. Check NSG rules allow traffic:
+   az network nsg rule list --nsg-name <nsg-name> --resource-group <rg>
+   
+   Need rule allowing: Private Endpoint subnet → Backend port
+
+3. Verify service is running on backend VM:
+   ssh user@backend-vm
+   sudo netstat -tlnp | grep <port>
+
+4. Check backend pool has members:
+   az network lb address-pool show \
+     --resource-group <rg> \
+     --lb-name <lb> \
+     --name <pool-name>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📋 CONFIGURATION RULES (IMPORTANT!)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Domain Configuration:
+┌─────────────────────────────────────────────────────────────────────────┐
+│ ✅ CORRECT:   api.internal.contoso.com                                  │
+│                                                                          │
+│ ❌ WRONG:     https://api.internal.contoso.com  (no protocol)           │
+│ ❌ WRONG:     *.internal.contoso.com            (no wildcards)          │
+│ ❌ WRONG:     api                                (not FQDN)             │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Private DNS Zone Configuration:
+┌─────────────────────────────────────────────────────────────────────────┐
+│ ✅ CORRECT:   internal.contoso.com              (zone suffix only)      │
+│                                                                          │
+│ ❌ WRONG:     api.internal.contoso.com          (specific hostname)     │
+│ ❌ WRONG:     https://internal.contoso.com      (no protocol)           │
+└─────────────────────────────────────────────────────────────────────────┘
+
+NCC Domain Configuration:
+┌─────────────────────────────────────────────────────────────────────────┐
+│ ✅ CORRECT:   internal.contoso.com              (zone name only)        │
+│                                                                          │
+│ ❌ WRONG:     https://internal.contoso.com      (no protocol)           │
+│ ❌ WRONG:     *.internal.contoso.com            (no wildcards)          │
+│ ❌ WRONG:     api.internal.contoso.com          (no hostname)           │
+│ ❌ WRONG:     internal.contoso.com/             (no trailing slash)     │
+│                                                                          │
+│ 🔥 MUST MATCH Private DNS Zone name EXACTLY!                            │
+└─────────────────────────────────────────────────────────────────────────┘
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔍 USEFUL AZURE CLI COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# List Private DNS Zones
+az network private-dns zone list --resource-group <rg> --output table
+
+# List DNS A records
+az network private-dns record-set a list \
+  --zone-name <zone> \
+  --resource-group <rg> \
+  --output table
+
+# List VNet links
+az network private-dns link vnet list \
+  --zone-name <zone> \
+  --resource-group <rg> \
+  --output table
+
+# Show Private Endpoint
+az network private-endpoint show \
+  --name <pe-name> \
+  --resource-group <rg>
+
+# Show Load Balancer
+az network lb show \
+  --name <lb-name> \
+  --resource-group <rg>
+
+# List NSG rules
+az network nsg rule list \
+  --nsg-name <nsg-name> \
+  --resource-group <rg> \
+  --output table
+
+# Add DNS A record
+az network private-dns record-set a add-record \
+  --resource-group <rg> \
+  --zone-name <zone> \
+  --record-set-name <hostname> \
+  --ipv4-address <ip>
+
+# Create VNet link
+az network private-dns link vnet create \
+  --resource-group <rg> \
+  --zone-name <zone> \
+  --name <link-name> \
+  --virtual-network <vnet-id> \
+  --registration-enabled false
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 UNDERSTANDING TEST RESULTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Result Patterns:
+
+┌─────────────────────────┬────────────────┬──────────────────────────────┐
+│ DNS Result              │ TCP Result     │ Diagnosis                    │
+├─────────────────────────┼────────────────┼──────────────────────────────┤
+│ ❌ Failed               │ N/A            │ Missing DNS record           │
+│ ✅ Public IP            │ N/A            │ Private Link NOT working!    │
+│ ✅ Private IP           │ ✅ Success     │ Everything working! 🎉       │
+│ ✅ Private IP           │ ❌ Failed      │ Backend/LB issue             │
+│ ⚠️  Inconsistent        │ ⚠️  Flaky      │ Reliability problem          │
+└─────────────────────────┴────────────────┴──────────────────────────────┘
+
+Enhanced Test Features:
+  • DNS reliability: Tests resolution 5 times
+  • TCP reliability: Tests connection 3 times
+  • Port scanning: Checks common ports
+  • Latency breakdown: Shows DNS vs TCP time
+  • Pattern detection: Identifies configuration issues
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 PRO TIPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Always wait 5-10 minutes after making changes (DNS propagation)
+
+2. Restart Databricks cluster after NCC changes
+
+3. Run both Databricks and Azure VM tests for comparison
+
+4. Save JSON output before making changes (for comparison)
+
+5. Check Azure Portal shows "Established" for Private Endpoint
+
+6. Use analyze_results.py to quickly interpret JSON output:
+   python analyze_results.py
+   (paste JSON output)
+
+7. If stuck, follow TROUBLESHOOTING_FLOWCHART.md step-by-step
+
+8. 90% of issues are: Private DNS Zone name ≠ NCC Domain name
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📞 GETTING HELP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before contacting support:
+  ☐ Run enhanced Databricks test
+  ☐ Run Azure VM test (if possible)
+  ☐ Save JSON output from both
+  ☐ Follow TROUBLESHOOTING_FLOWCHART.md
+  ☐ Wait 24 hours after making changes
+  ☐ Document what you've tried
+
+When opening a ticket, provide:
+  • JSON output from Databricks enhanced test
+  • Full output from Azure VM test
+  • Screenshots of NCC configuration
+  • Screenshots of Private DNS Zone
+  • List of Azure resource IDs
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📚 FILE REFERENCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+README.md                          → Full documentation
+TROUBLESHOOTING_FLOWCHART.md       → Step-by-step troubleshooting
+databricks_private_link_diagnostics_enhanced.py → Main test script
+azure_vm_diagnostics.sh            → VM comparison test
+analyze_results.py                 → Result analyzer
+CHEAT_SHEET.txt                    → This file
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Good luck! 🚀
+
+Most issues are solved by ensuring:
+  Private DNS Zone name = NCC Domain name (EXACTLY!)
