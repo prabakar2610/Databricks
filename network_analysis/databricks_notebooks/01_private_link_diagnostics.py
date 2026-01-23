@@ -31,47 +31,60 @@ import threading
 from collections import defaultdict
 
 # ============================================================================
-# CONFIGURATION - UPDATE THESE VALUES
+# CONFIGURATION - UPDATE THESE VALUES OR SET BEFORE exec()
 # ============================================================================
 
 # List of domains/services you're trying to reach
-DOMAINS_TO_TEST = [
-    {"host": "api.internal.contoso.com", "port": 443, "description": "API Service HTTPS"},
-    {"host": "api.internal.contoso.com", "port": 80, "description": "API Service HTTP"},
-    # Add more domains as needed:
-    # {"host": "db.internal.contoso.com", "port": 5432, "description": "PostgreSQL Database"},
-    # {"host": "app.internal.contoso.com", "port": 8080, "description": "Application Server"},
-]
+if 'DOMAINS_TO_TEST' not in globals():
+    DOMAINS_TO_TEST = [
+        {"host": "api.yourdomain.com", "port": 443, "description": "API Service HTTPS"},
+        {"host": "api.yourdomain.com", "port": 80, "description": "API Service HTTP"},
+        # Add more domains as needed:
+        # {"host": "db.yourdomain.com", "port": 5432, "description": "PostgreSQL Database"},
+        # {"host": "app.yourdomain.com", "port": 8080, "description": "Application Server"},
+    ]
 
 # Your Private DNS Zone name (as configured in Azure)
-PRIVATE_DNS_ZONE = "internal.contoso.com"
+if 'PRIVATE_DNS_ZONE' not in globals():
+    PRIVATE_DNS_ZONE = "yourdomain.com"
 
 # Domain configured in NCC (Databricks Network Connectivity Config)
-NCC_DOMAIN = "internal.contoso.com"
+if 'NCC_DOMAIN' not in globals():
+    NCC_DOMAIN = "yourdomain.com"
 
 # Expected private IP range (first 2 octets, e.g., "10.0" for 10.0.x.x)
-EXPECTED_PRIVATE_IP_PREFIX = "10.0"
+if 'EXPECTED_PRIVATE_IP_PREFIX' not in globals():
+    EXPECTED_PRIVATE_IP_PREFIX = "10.0"
 
 # Expected Load Balancer frontend private IP (if known)
-EXPECTED_LB_PRIVATE_IP = "10.0.1.100"  # Set to None if unknown
+if 'EXPECTED_LB_PRIVATE_IP' not in globals():
+    EXPECTED_LB_PRIVATE_IP = "10.0.1.100"  # Set to None if unknown
 
 # Number of DNS resolution attempts for reliability testing
-DNS_RETRY_COUNT = 5
+if 'DNS_RETRY_COUNT' not in globals():
+    DNS_RETRY_COUNT = 5
 
 # Number of TCP connection attempts for reliability testing
-TCP_RETRY_COUNT = 3
+if 'TCP_RETRY_COUNT' not in globals():
+    TCP_RETRY_COUNT = 3
 
 # Connection timeout in seconds
-CONNECTION_TIMEOUT = 5
+if 'CONNECTION_TIMEOUT' not in globals():
+    CONNECTION_TIMEOUT = 5
 
 # Additional ports to scan for each host (common ports)
-ADDITIONAL_PORTS_TO_SCAN = [80, 443, 8080, 8443, 3306, 5432, 27017]
+if 'ADDITIONAL_PORTS_TO_SCAN' not in globals():
+    ADDITIONAL_PORTS_TO_SCAN = [80, 443, 8080, 8443, 3306, 5432, 27017]
 
 # Enable/disable additional diagnostics
-ENABLE_PORT_SCANNING = True
-ENABLE_MULTIPLE_RESOLUTION_TESTS = True
-ENABLE_LATENCY_ANALYSIS = True
-ENABLE_EXTERNAL_CONNECTIVITY_TEST = True
+if 'ENABLE_PORT_SCANNING' not in globals():
+    ENABLE_PORT_SCANNING = True
+if 'ENABLE_MULTIPLE_RESOLUTION_TESTS' not in globals():
+    ENABLE_MULTIPLE_RESOLUTION_TESTS = True
+if 'ENABLE_LATENCY_ANALYSIS' not in globals():
+    ENABLE_LATENCY_ANALYSIS = True
+if 'ENABLE_EXTERNAL_CONNECTIVITY_TEST' not in globals():
+    ENABLE_EXTERNAL_CONNECTIVITY_TEST = True
 
 # ============================================================================
 # DO NOT MODIFY BELOW THIS LINE

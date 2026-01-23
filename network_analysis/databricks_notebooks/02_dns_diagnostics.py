@@ -23,28 +23,32 @@ from datetime import datetime
 from typing import Dict, List, Tuple
 
 # ============================================================================
-# CONFIGURATION
+# CONFIGURATION - SET BEFORE exec() OR MODIFY HERE
 # ============================================================================
 
 # Automatically detect workspace URL (or set manually)
-try:
-    WORKSPACE_URL = dbutils.notebook.entry_point.getDbutils().notebook().getContext().tags().get("browserHostName").get()
-except:
-    WORKSPACE_URL = "adb-xxxxx.xx.azuredatabricks.net"  # Set manually if needed
+if 'WORKSPACE_URL' not in globals():
+    try:
+        WORKSPACE_URL = dbutils.notebook.entry_point.getDbutils().notebook().getContext().tags().get("browserHostName").get()
+    except:
+        WORKSPACE_URL = "adb-xxxxx.xx.azuredatabricks.net"  # Set manually if needed
 
 # Additional domains to test
-CUSTOM_DOMAINS = [
-    "yourdomain.com",
-    "api.yourdomain.com",
-]
+if 'CUSTOM_DOMAINS' not in globals():
+    CUSTOM_DOMAINS = [
+        "yourdomain.com",
+        "api.yourdomain.com",
+    ]
 
 # Storage accounts to test
-STORAGE_ACCOUNTS = [
-    "yourstorageaccount",
-]
+if 'STORAGE_ACCOUNTS' not in globals():
+    STORAGE_ACCOUNTS = [
+        "yourstorageaccount",
+    ]
 
 # Test control plane endpoints
-TEST_CONTROL_PLANE = True
+if 'TEST_CONTROL_PLANE' not in globals():
+    TEST_CONTROL_PLANE = True
 
 # ============================================================================
 # SCRIPT

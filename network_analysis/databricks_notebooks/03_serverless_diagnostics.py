@@ -22,30 +22,33 @@ from datetime import datetime
 from typing import Dict, List
 
 # ============================================================================
-# CONFIGURATION
+# CONFIGURATION - SET BEFORE exec() OR MODIFY HERE
 # ============================================================================
 
 # Storage accounts to test
-STORAGE_ACCOUNTS = [
-    {
-        "name": "yourstorageaccount",
-        "test_adls": True,
-        "test_blob": True,
-    },
-]
+if 'STORAGE_ACCOUNTS' not in globals():
+    STORAGE_ACCOUNTS = [
+        {
+            "name": "yourstorageaccount",
+            "test_adls": True,
+            "test_blob": True,
+        },
+    ]
 
 # External services to test (egress validation)
-EXTERNAL_SERVICES = [
-    {"host": "pypi.org", "port": 443, "description": "PyPI (Python packages)"},
-    {"host": "packages.microsoft.com", "port": 443, "description": "Microsoft packages"},
-    {"host": "archive.ubuntu.com", "port": 80, "description": "Ubuntu packages"},
-    {"host": "aka.ms", "port": 443, "description": "Microsoft redirects"},
-]
+if 'EXTERNAL_SERVICES' not in globals():
+    EXTERNAL_SERVICES = [
+        {"host": "pypi.org", "port": 443, "description": "PyPI (Python packages)"},
+        {"host": "packages.microsoft.com", "port": 443, "description": "Microsoft packages"},
+        {"host": "archive.ubuntu.com", "port": 80, "description": "Ubuntu packages"},
+        {"host": "aka.ms", "port": 443, "description": "Microsoft redirects"},
+    ]
 
 # Custom Private Link endpoints (serverless to your VNet)
-PRIVATE_LINK_ENDPOINTS = [
-    {"host": "api.yourdomain.com", "port": 443, "description": "Internal API"},
-]
+if 'PRIVATE_LINK_ENDPOINTS' not in globals():
+    PRIVATE_LINK_ENDPOINTS = [
+        {"host": "api.yourdomain.com", "port": 443, "description": "Internal API"},
+    ]
 
 # ============================================================================
 # SCRIPT
