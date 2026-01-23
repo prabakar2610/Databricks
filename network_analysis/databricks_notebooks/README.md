@@ -84,7 +84,7 @@ EXPECTED_PRIVATE_IP_PREFIX = "10.0"
 
 # Download and run
 import requests
-URL = "https://raw.githubusercontent.com/prabakar2610/Databricks/master/pvtlink_network_analysis/databricks_notebooks/01_private_link_diagnostics.py"
+URL = "https://raw.githubusercontent.com/prabakar2610/Databricks/master/network_analysis/databricks_notebooks/01_private_link_diagnostics.py"
 exec(requests.get(URL).text)
 ```
 

@@ -6,7 +6,7 @@ Split into focused scripts by topic and environment (Databricks vs Azure CLI).
 ## 📁 Folder Structure
 
 ```
-pvtlink_network_analysis/
+network_analysis/
 ├── databricks_notebooks/           # Scripts for Databricks Notebooks
 │   ├── 01_private_link_diagnostics.py   ⭐ Comprehensive Private Link testing
 │   ├── 02_dns_diagnostics.py            DNS configuration validation
@@ -38,7 +38,7 @@ Use scripts in `databricks_notebooks/` - run directly in Databricks notebooks:
 ```python
 # Example: Test Private Link connectivity
 import requests
-URL = "https://raw.githubusercontent.com/prabakar2610/Databricks/master/pvtlink_network_analysis/databricks_notebooks/01_private_link_diagnostics.py"
+URL = "https://raw.githubusercontent.com/prabakar2610/Databricks/master/network_analysis/databricks_notebooks/01_private_link_diagnostics.py"
 exec(requests.get(URL).text)
 ```
 
@@ -102,7 +102,7 @@ cd azure_cli_scripts
 ```python
 # In Databricks notebook
 import requests
-exec(requests.get("https://raw.githubusercontent.com/prabakar2610/Databricks/master/pvtlink_network_analysis/databricks_notebooks/02_dns_diagnostics.py").text)
+exec(requests.get("https://raw.githubusercontent.com/prabakar2610/Databricks/master/network_analysis/databricks_notebooks/02_dns_diagnostics.py").text)
 ```
 
 **Step 2:** If DNS shows public IP, run detailed Private Link diagnostics
@@ -113,7 +113,7 @@ PRIVATE_DNS_ZONE = "yourdomain.com"
 NCC_DOMAIN = "yourdomain.com"
 
 # Run
-exec(requests.get("https://raw.githubusercontent.com/prabakar2610/Databricks/master/pvtlink_network_analysis/databricks_notebooks/01_private_link_diagnostics.py").text)
+exec(requests.get("https://raw.githubusercontent.com/prabakar2610/Databricks/master/network_analysis/databricks_notebooks/01_private_link_diagnostics.py").text)
 ```
 
 **Step 3:** Compare with Azure VM
@@ -206,7 +206,7 @@ exec(requests.get("...03_serverless_diagnostics.py").text)
 
 ## 🔗 Links
 
-- **GitHub**: https://github.com/prabakar2610/Databricks/tree/master/pvtlink_network_analysis
+- **GitHub**: https://github.com/prabakar2610/Databricks/tree/master/network_analysis
 - **Microsoft Docs**: https://learn.microsoft.com/en-us/azure/databricks/security/network/
 
 ---
