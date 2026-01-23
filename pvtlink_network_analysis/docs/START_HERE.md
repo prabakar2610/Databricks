@@ -157,8 +157,8 @@ Overall Status: ❌ PRIVATE LINK NOT WORKING
 1. Check your diagnostic output:
    ```
    Configuration Validation:
-     Private DNS Zone: internal.yourdomain.com
-     NCC Domain:       internal.yourdomain.com
+     Private DNS Zone: internal.contoso.com
+     NCC Domain:       internal.contoso.com
    ```
    
 2. **Do they match EXACTLY?**
@@ -171,7 +171,7 @@ Overall Status: ❌ PRIVATE LINK NOT WORKING
    - Edit your NCC
    - Update "Domain" field to match Private DNS Zone **exactly**
    - Remove any `https://`, `*.`, or specific hostnames
-   - Just enter: `internal.yourdomain.com` (your zone name)
+   - Just enter: `internal.contoso.com` (your zone name)
    - Save
 
 4. **Apply the fix:**
@@ -247,19 +247,19 @@ For more details: [TROUBLESHOOTING_FLOWCHART.md](./TROUBLESHOOTING_FLOWCHART.md)
 
 Before running tests, verify your configuration:
 
-- [ ] **Domains:** Full FQDN (e.g., `api.internal.yourdomain.com`)
-  - ✅ `api.internal.yourdomain.com`
-  - ❌ `https://api.internal.yourdomain.com` (no protocol)
-  - ❌ `*.internal.yourdomain.com` (no wildcards)
+- [ ] **Domains:** Full FQDN (e.g., `api.internal.contoso.com`)
+  - ✅ `api.internal.contoso.com`
+  - ❌ `https://api.internal.contoso.com` (no protocol)
+  - ❌ `*.internal.contoso.com` (no wildcards)
 
-- [ ] **Private DNS Zone:** Zone suffix only (e.g., `internal.yourdomain.com`)
-  - ✅ `internal.yourdomain.com`
-  - ❌ `api.internal.yourdomain.com` (no specific hostname)
+- [ ] **Private DNS Zone:** Zone suffix only (e.g., `internal.contoso.com`)
+  - ✅ `internal.contoso.com`
+  - ❌ `api.internal.contoso.com` (no specific hostname)
 
 - [ ] **NCC Domain:** Must match Private DNS Zone exactly
-  - ✅ `internal.yourdomain.com`
-  - ❌ `https://internal.yourdomain.com` (no protocol)
-  - ❌ `*.internal.yourdomain.com` (no wildcards)
+  - ✅ `internal.contoso.com`
+  - ❌ `https://internal.contoso.com` (no protocol)
+  - ❌ `*.internal.contoso.com` (no wildcards)
   - 🔥 **This is the #1 cause of issues!**
 
 - [ ] **Expected IP Prefix:** First 2 octets of your VNet

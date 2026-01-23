@@ -12,9 +12,9 @@
 
 ┌────────────────────────────────────────────────────────────────────────────┐
 │ # Configure                                                                │
-│ DOMAINS_TO_TEST = [{"host": "api.internal.yourdomain.com", "port": 443}]     │
-│ PRIVATE_DNS_ZONE = "internal.yourdomain.com"                                  │
-│ NCC_DOMAIN = "internal.yourdomain.com"                                        │
+│ DOMAINS_TO_TEST = [{"host": "api.internal.contoso.com", "port": 443}]     │
+│ PRIVATE_DNS_ZONE = "internal.contoso.com"                                  │
+│ NCC_DOMAIN = "internal.contoso.com"                                        │
 │ EXPECTED_PRIVATE_IP_PREFIX = "10.0"                                        │
 │                                                                             │
 │ # Download and run                                                          │
@@ -65,11 +65,11 @@ Option A: Configuration in Notebook (Recommended)
 
 # Cell 1: Configuration
 DOMAINS_TO_TEST = [
-    {"host": "api.internal.yourdomain.com", "port": 443, "description": "API HTTPS"},
-    {"host": "api.internal.yourdomain.com", "port": 80, "description": "API HTTP"},
+    {"host": "api.internal.contoso.com", "port": 443, "description": "API HTTPS"},
+    {"host": "api.internal.contoso.com", "port": 80, "description": "API HTTP"},
 ]
-PRIVATE_DNS_ZONE = "internal.yourdomain.com"
-NCC_DOMAIN = "internal.yourdomain.com"
+PRIVATE_DNS_ZONE = "internal.contoso.com"
+NCC_DOMAIN = "internal.contoso.com"
 EXPECTED_PRIVATE_IP_PREFIX = "10.0"
 EXPECTED_LB_PRIVATE_IP = "10.0.1.100"  # Optional
 
@@ -95,9 +95,9 @@ Option C: With Error Handling (Production)
 import requests
 
 # Configuration
-DOMAINS_TO_TEST = [{"host": "api.internal.yourdomain.com", "port": 443}]
-PRIVATE_DNS_ZONE = "internal.yourdomain.com"
-NCC_DOMAIN = "internal.yourdomain.com"
+DOMAINS_TO_TEST = [{"host": "api.internal.contoso.com", "port": 443}]
+PRIVATE_DNS_ZONE = "internal.contoso.com"
+NCC_DOMAIN = "internal.contoso.com"
 EXPECTED_PRIVATE_IP_PREFIX = "10.0"
 
 # Download and run
@@ -143,9 +143,9 @@ Step 3: Use in Notebook
   GITHUB_TOKEN = dbutils.secrets.get(scope="github", key="token")
   
   # Configuration
-  DOMAINS_TO_TEST = [{"host": "api.internal.yourdomain.com", "port": 443}]
-  PRIVATE_DNS_ZONE = "internal.yourdomain.com"
-  NCC_DOMAIN = "internal.yourdomain.com"
+  DOMAINS_TO_TEST = [{"host": "api.internal.contoso.com", "port": 443}]
+  PRIVATE_DNS_ZONE = "internal.contoso.com"
+  NCC_DOMAIN = "internal.contoso.com"
   EXPECTED_PRIVATE_IP_PREFIX = "10.0"
   
   # Download with authentication
@@ -167,13 +167,13 @@ DOMAINS_TO_TEST = [
 ]
 
 Examples:
-  {"host": "api.internal.yourdomain.com", "port": 443, "description": "API HTTPS"}
-  {"host": "db.internal.yourdomain.com", "port": 5432, "description": "PostgreSQL"}
+  {"host": "api.internal.contoso.com", "port": 443, "description": "API HTTPS"}
+  {"host": "db.internal.contoso.com", "port": 5432, "description": "PostgreSQL"}
 
-PRIVATE_DNS_ZONE = "internal.yourdomain.com"
+PRIVATE_DNS_ZONE = "internal.contoso.com"
   # Zone suffix only, no protocol, no wildcards
 
-NCC_DOMAIN = "internal.yourdomain.com"
+NCC_DOMAIN = "internal.contoso.com"
   # Must match PRIVATE_DNS_ZONE exactly!
 
 EXPECTED_PRIVATE_IP_PREFIX = "10.0"

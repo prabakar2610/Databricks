@@ -36,18 +36,18 @@ from collections import defaultdict
 
 # List of domains/services you're trying to reach
 DOMAINS_TO_TEST = [
-    {"host": "api.internal.yourdomain.com", "port": 443, "description": "API Service HTTPS"},
-    {"host": "api.internal.yourdomain.com", "port": 80, "description": "API Service HTTP"},
+    {"host": "api.internal.contoso.com", "port": 443, "description": "API Service HTTPS"},
+    {"host": "api.internal.contoso.com", "port": 80, "description": "API Service HTTP"},
     # Add more domains as needed:
-    # {"host": "db.internal.yourdomain.com", "port": 5432, "description": "PostgreSQL Database"},
-    # {"host": "app.internal.yourdomain.com", "port": 8080, "description": "Application Server"},
+    # {"host": "db.internal.contoso.com", "port": 5432, "description": "PostgreSQL Database"},
+    # {"host": "app.internal.contoso.com", "port": 8080, "description": "Application Server"},
 ]
 
 # Your Private DNS Zone name (as configured in Azure)
-PRIVATE_DNS_ZONE = "internal.yourdomain.com"
+PRIVATE_DNS_ZONE = "internal.contoso.com"
 
 # Domain configured in NCC (Databricks Network Connectivity Config)
-NCC_DOMAIN = "internal.yourdomain.com"
+NCC_DOMAIN = "internal.contoso.com"
 
 # Expected private IP range (first 2 octets, e.g., "10.0" for 10.0.x.x)
 EXPECTED_PRIVATE_IP_PREFIX = "10.0"

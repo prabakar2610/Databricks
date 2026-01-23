@@ -19,13 +19,13 @@ exec(requests.get("YOUR_GITHUB_RAW_URL/run_diagnostics.py").text)
 CONFIG = {
     # List of services to test
     "domains": [
-        {"host": "api.internal.yourdomain.com", "port": 443, "description": "API Service HTTPS"},
-        {"host": "api.internal.yourdomain.com", "port": 80, "description": "API Service HTTP"},
+        {"host": "api.internal.contoso.com", "port": 443, "description": "API Service HTTPS"},
+        {"host": "api.internal.contoso.com", "port": 80, "description": "API Service HTTP"},
     ],
     
     # DNS and NCC configuration
-    "private_dns_zone": "internal.yourdomain.com",
-    "ncc_domain": "internal.yourdomain.com",
+    "private_dns_zone": "internal.contoso.com",
+    "ncc_domain": "internal.contoso.com",
     
     # Expected network configuration
     "expected_ip_prefix": "10.0",

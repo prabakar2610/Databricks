@@ -1,401 +1,271 @@
-# Azure Private Link Diagnostics - Complete Testing Suite
+# Azure Databricks Network Diagnostics - Modular Suite
 
-This directory contains a comprehensive testing suite for diagnosing Azure Databricks Private Link connectivity issues.
+Comprehensive, modular network diagnostics for Azure Databricks.  
+Split into focused scripts by topic and environment (Databricks vs Azure CLI).
 
-## 📁 Files Overview
+## 📁 Folder Structure
 
-### 1. `databricks_private_link_diagnostics.py`
-**Basic Databricks diagnostics** - Simple, focused connectivity tests
-- **Use for:** Quick health checks
-- **Run in:** Databricks notebook
-- **Time:** ~30 seconds
-
-### 2. `databricks_private_link_diagnostics_enhanced.py` ⭐
-**Enhanced Databricks diagnostics** - Comprehensive analysis with advanced features
-- **Use for:** Deep troubleshooting and reliability testing
-- **Run in:** Databricks notebook
-- **Time:** 1-3 minutes
-- **Features:**
-  - Multiple DNS resolution attempts (reliability testing)
-  - Port scanning
-  - Latency analysis
-  - Pattern detection
-  - TCP reliability testing
-  - Detailed timing breakdowns
-
-### 3. `azure_vm_diagnostics.sh`
-**Azure VM diagnostics** - Companion script for comparison testing
-- **Use for:** Validating Azure infrastructure from inside the VNet
-- **Run on:** Azure VM in the same VNet as Private Endpoint
-- **Time:** 1-2 minutes
-- **Features:**
-  - DNS resolution with multiple tools (dig, nslookup, host)
-  - TCP connectivity tests
-  - Network path analysis
-  - Azure metadata inspection
-  - Firewall/security checks
+```
+pvtlink_network_analysis/
+├── databricks_notebooks/           # Scripts for Databricks Notebooks
+│   ├── 01_private_link_diagnostics.py   ⭐ Comprehensive Private Link testing
+│   ├── 02_dns_diagnostics.py            DNS configuration validation
+│   ├── 03_serverless_diagnostics.py     Serverless compute networking
+│   └── README.md                        Detailed notebook scripts guide
+│
+├── azure_cli_scripts/              # Scripts for Azure CLI (infrastructure)
+│   ├── 01_private_link_validation.sh    Azure VM validation script
+│   ├── 02_classic_compute_vnet_nsg.sh   VNet injection & NSG validation
+│   └── README.md                        Detailed CLI scripts guide
+│
+├── docs/                           # Documentation (legacy)
+│   ├── START_HERE.md
+│   ├── TROUBLESHOOTING_FLOWCHART.md
+│   ├── CHEAT_SHEET.txt
+│   └── ... (other guides)
+│
+└── README.md                       # This file
+```
 
 ---
 
-## 🚀 Quick Start Guide
+## 🎯 Quick Start
 
-### Step 1: Run Enhanced Databricks Test
+### **1. For Databricks Issues**
 
-1. Open a Databricks notebook
-2. Copy contents of `databricks_private_link_diagnostics_enhanced.py`
-3. Update the CONFIGURATION section:
+Use scripts in `databricks_notebooks/` - run directly in Databricks notebooks:
 
 ```python
-DOMAINS_TO_TEST = [
-    {"host": "your-service.your-domain.com", "port": 443, "description": "Your Service"},
-]
-
-PRIVATE_DNS_ZONE = "your-domain.com"
-NCC_DOMAIN = "your-domain.com"
-EXPECTED_PRIVATE_IP_PREFIX = "10.0"
-EXPECTED_LB_PRIVATE_IP = "10.0.1.100"  # Optional
+# Example: Test Private Link connectivity
+import requests
+URL = "https://raw.githubusercontent.com/prabakar2610/Databricks/master/pvtlink_network_analysis/databricks_notebooks/01_private_link_diagnostics.py"
+exec(requests.get(URL).text)
 ```
 
-4. Run the cell
-5. Review the output and save the JSON export
+### **2. For Infrastructure Validation**
 
-### Step 2: Run Azure VM Test (for comparison)
+Use scripts in `azure_cli_scripts/` - run from terminal with Azure CLI:
 
-1. SSH into an Azure VM in your Private VNet:
-   ```bash
-   ssh username@your-vm-ip
-   ```
-
-2. Copy the script to the VM:
-   ```bash
-   # From your local machine
-   scp azure_vm_diagnostics.sh username@your-vm-ip:~/
-   ```
-
-3. Make it executable and edit configuration:
-   ```bash
-   chmod +x azure_vm_diagnostics.sh
-   nano azure_vm_diagnostics.sh
-   ```
-
-4. Update the CONFIGURATION section:
-   ```bash
-   DOMAINS_TO_TEST=(
-       "your-service.your-domain.com:443"
-       "your-service.your-domain.com:80"
-   )
-   
-   PRIVATE_DNS_ZONE="your-domain.com"
-   EXPECTED_LB_IP="10.0.1.100"
-   EXPECTED_IP_PREFIX="10.0"
-   ```
-
-5. Run the script:
-   ```bash
-   ./azure_vm_diagnostics.sh
-   ```
-
-6. Review the output
-
-### Step 3: Compare Results
-
-Use the comparison matrix below to interpret your results.
-
----
-
-## 🔍 Results Comparison Matrix
-
-| Scenario | Databricks Result | Azure VM Result | Root Cause | Action |
-|----------|-------------------|-----------------|------------|--------|
-| **1. Both Fail - Public IP** | DNS → Public IP ❌ | DNS → Public IP ❌ | Private DNS not configured | Check DNS Zone and VNet link |
-| **2. Both Fail - DNS Error** | DNS Failed ❌ | DNS Failed ❌ | DNS record missing | Add A record in Private DNS Zone |
-| **3. VM Works, Databricks Fails** | DNS → Public IP ❌ | DNS → Private IP ✅ | NCC misconfigured | Check NCC domain configuration |
-| **4. Both Private IP, Both TCP Fail** | DNS ✅ TCP ❌ | DNS ✅ TCP ❌ | Backend/LB issue | Check Load Balancer & NSG |
-| **5. VM Works, Databricks TCP Fails** | DNS ✅ TCP ❌ | DNS ✅ TCP ✅ | NSG blocking Databricks | Check NSG rules for Private Endpoint subnet |
-| **6. Both Work** | All Pass ✅ | All Pass ✅ | Everything OK! | No action needed |
-| **7. Databricks Works, VM Fails** | All Pass ✅ | TCP Fails ❌ | VM-specific issue | Check VM NSG, firewall |
-
----
-
-## 📊 Understanding the Enhanced Databricks Test
-
-### Key Features
-
-#### 1. **DNS Reliability Testing**
-- Resolves DNS multiple times (default: 5 attempts)
-- Detects inconsistent DNS responses
-- Measures resolution time statistics (avg, min, max)
-
-**What it tells you:**
-- ✅ Consistent resolution = Stable DNS configuration
-- ❌ Inconsistent resolution = DNS load balancing issue or flapping
-
-#### 2. **TCP Reliability Testing**
-- Tests connection multiple times (default: 3 attempts)
-- Measures connection time variations
-- Detects intermittent failures
-
-**What it tells you:**
-- ✅ All connections succeed = Reliable service
-- ❌ Some connections fail = Backend health issues or network instability
-
-#### 3. **Port Scanning**
-- Scans common ports (80, 443, 8080, 8443, etc.)
-- Identifies which services are accessible
-- Helps diagnose port-specific issues
-
-**What it tells you:**
-- Open ports = Services listening and accessible
-- All closed = Possible NSG blocking or service down
-
-#### 4. **Latency Analysis**
-- Breaks down connection time into:
-  - DNS lookup time
-  - TCP connection time
-  - Total time
-
-**What it tells you:**
-- High DNS time = DNS resolution slow
-- High TCP time = Network latency or backend slow
-- Consistent times = Stable performance
-
-#### 5. **Pattern Detection**
-- Analyzes if all domains resolve to same IP
-- Detects NAT or misconfiguration patterns
-- Identifies mixed public/private IP scenarios
-
-**What it tells you:**
-- Same IP for all domains = Possible NAT issue
-- Mixed public/private = Configuration inconsistency
-
----
-
-## 🔧 Configuration Tips
-
-### For Both Scripts
-
-**1. Domain Configuration**
-- Use FQDNs (Fully Qualified Domain Names)
-- Match the Private DNS Zone suffix exactly
-- No protocols (http://, https://)
-- No wildcards (*.domain.com)
-
-**Example:**
-```
-✅ CORRECT: api.internal.yourdomain.com
-❌ WRONG: https://api.internal.yourdomain.com
-❌ WRONG: *.internal.yourdomain.com
-❌ WRONG: api
-```
-
-**2. Private DNS Zone**
-- Must match NCC Domain exactly
-- Use zone suffix only (not full FQDN)
-
-**Example:**
-```
-✅ CORRECT: internal.yourdomain.com
-❌ WRONG: api.internal.yourdomain.com
-❌ WRONG: yourdomain.com (if your services are under internal.yourdomain.com)
-```
-
-**3. Expected IP Range**
-- Use first 2 octets of your VNet range
-- Helps validate DNS is returning correct range
-
-**Example:**
-```
-If VNet is 10.0.0.0/16: use "10.0"
-If VNet is 172.16.0.0/12: use "172.16"
+```bash
+cd azure_cli_scripts
+./02_classic_compute_vnet_nsg.sh
 ```
 
 ---
 
-## 🐛 Common Issues & Solutions
+## 📋 Choose the Right Script
 
-### Issue 1: Databricks Shows Public IP, Azure VM Shows Private IP
+### **Problem: Can't connect to internal API/database**
+→ Use: `databricks_notebooks/01_private_link_diagnostics.py`
 
-**Root Cause:** NCC not properly configured or not attached to workspace
+### **Problem: DNS not resolving correctly**
+→ Use: `databricks_notebooks/02_dns_diagnostics.py`
 
-**Fix:**
-1. Verify NCC Domain matches Private DNS Zone name exactly
-2. Check workspace is attached to NCC in Databricks console
-3. Verify Private Endpoint status is "Established"
-4. Restart Databricks cluster
+### **Problem: Serverless can't reach storage**
+→ Use: `databricks_notebooks/03_serverless_diagnostics.py`
 
-### Issue 2: Both Show Private IP but TCP Connection Fails
+### **Problem: Need to validate VNet/NSG configuration**
+→ Use: `azure_cli_scripts/02_classic_compute_vnet_nsg.sh`
 
-**Root Cause:** Backend or Load Balancer issue
-
-**Fix:**
-1. Check Load Balancer health probe status:
-   ```bash
-   az network lb probe show --resource-group <rg> --lb-name <lb> --name <probe>
-   ```
-2. Verify backend pool has healthy targets
-3. Check NSG rules allow traffic:
-   ```bash
-   az network nsg rule list --resource-group <rg> --nsg-name <nsg>
-   ```
-4. Verify service is running on backend VM:
-   ```bash
-   netstat -tlnp | grep <port>
-   ```
-
-### Issue 3: DNS Resolution Fails on Both
-
-**Root Cause:** Missing DNS record
-
-**Fix:**
-1. Check DNS records exist:
-   ```bash
-   az network private-dns record-set a list --zone-name <zone> --resource-group <rg>
-   ```
-2. Add missing record:
-   ```bash
-   az network private-dns record-set a add-record \
-     --resource-group <rg> \
-     --zone-name <zone> \
-     --record-set-name <hostname> \
-     --ipv4-address <lb-private-ip>
-   ```
-
-### Issue 4: Inconsistent DNS Results
-
-**Root Cause:** Multiple DNS servers or caching issues
-
-**Fix:**
-1. Check Private DNS Zone has only one A record per hostname
-2. Clear DNS cache (Databricks: restart cluster)
-3. Verify VNet link is active
-
-### Issue 5: Enhanced Test Times Out
-
-**Root Cause:** Configuration has too many domains or slow network
-
-**Fix:**
-1. Reduce `DNS_RETRY_COUNT` and `TCP_RETRY_COUNT`
-2. Increase `CONNECTION_TIMEOUT`
-3. Disable port scanning: `ENABLE_PORT_SCANNING = False`
-4. Test fewer domains at once
+### **Problem: Compare Azure VM vs Databricks connectivity**
+→ Use both:
+  - `azure_cli_scripts/01_private_link_validation.sh` (on Azure VM)
+  - `databricks_notebooks/01_private_link_diagnostics.py` (in Databricks)
 
 ---
 
-## 📈 Advanced Usage
+## 🎨 Design Philosophy
 
-### Enable All Enhanced Features
+### **Modular Approach**
+- ✅ Small, focused scripts by topic
+- ✅ Use only what you need
+- ✅ Easy to maintain and extend
+- ✅ No massive monolithic scripts
 
+### **Environment Separation**
+- **Databricks Notebooks**: Test from Databricks perspective (Python)
+- **Azure CLI Scripts**: Test from Azure infrastructure perspective (Bash)
+
+### **Benefits**
+1. Faster execution (smaller scripts)
+2. Easier troubleshooting (focused scope)
+3. Better organization (logical grouping)
+4. Simpler configuration (only relevant settings)
+
+---
+
+## 🚀 Usage Examples
+
+### **Example 1: Private Link Not Working**
+
+**Step 1:** Run DNS diagnostics
 ```python
-# In databricks_private_link_diagnostics_enhanced.py
-ENABLE_PORT_SCANNING = True
-ENABLE_MULTIPLE_RESOLUTION_TESTS = True
-ENABLE_LATENCY_ANALYSIS = True
-ENABLE_EXTERNAL_CONNECTIVITY_TEST = True
-
-DNS_RETRY_COUNT = 10  # More thorough testing
-TCP_RETRY_COUNT = 5
+# In Databricks notebook
+import requests
+exec(requests.get("https://raw.githubusercontent.com/prabakar2610/Databricks/master/pvtlink_network_analysis/databricks_notebooks/02_dns_diagnostics.py").text)
 ```
 
-### Enable Advanced VM Diagnostics
-
-```bash
-# In azure_vm_diagnostics.sh
-ENABLE_ADVANCED_DIAGNOSTICS=true
-```
-
-This requires additional tools:
-```bash
-# Ubuntu/Debian
-sudo apt-get install nmap tcptraceroute mtr
-
-# RHEL/CentOS
-sudo yum install nmap traceroute mtr
-```
-
-### Save Results for Comparison
-
-**Databricks:**
+**Step 2:** If DNS shows public IP, run detailed Private Link diagnostics
 ```python
-# After running the enhanced test, save the JSON output
-import json
+# Configure
+DOMAINS_TO_TEST = [{"host": "api.yourdomain.com", "port": 443}]
+PRIVATE_DNS_ZONE = "yourdomain.com"
+NCC_DOMAIN = "yourdomain.com"
 
-# Copy the JSON output from the script
-results = { ... }  # Paste JSON here
-
-# Save to DBFS
-with open("/dbfs/diagnostics_results.json", "w") as f:
-    json.dump(results, f, indent=2)
+# Run
+exec(requests.get("https://raw.githubusercontent.com/prabakar2610/Databricks/master/pvtlink_network_analysis/databricks_notebooks/01_private_link_diagnostics.py").text)
 ```
 
-**Azure VM:**
+**Step 3:** Compare with Azure VM
 ```bash
-# Redirect output to file
-./azure_vm_diagnostics.sh > diagnostics_output.txt 2>&1
-
-# Download from VM
-# From your local machine:
-scp username@your-vm-ip:~/diagnostics_output.txt ./
+# On Azure VM in same VNet
+./azure_cli_scripts/01_private_link_validation.sh
 ```
 
 ---
 
-## 📞 Support Information
+### **Example 2: VNet Injection Issues**
 
-### When Opening Support Tickets
-
-Include the following from both scripts:
-
-1. **JSON export from Databricks enhanced test**
-2. **Full output from Azure VM test**
-3. **Configuration values used**
-4. **Azure resource information:**
-   - Subscription ID
-   - Resource Group name
-   - Private Endpoint name
-   - Load Balancer name
-   - Private DNS Zone name
-   - Databricks workspace name
-
-### Useful Azure CLI Commands for Support
-
+**Step 1:** Validate infrastructure
 ```bash
-# Get Private Endpoint details
-az network private-endpoint show --name <pe-name> --resource-group <rg> --output json
+# Edit configuration
+nano azure_cli_scripts/02_classic_compute_vnet_nsg.sh
 
-# Get Private DNS Zone details
-az network private-dns zone show --name <zone> --resource-group <rg> --output json
+# Run validation
+./azure_cli_scripts/02_classic_compute_vnet_nsg.sh
+```
 
-# Get DNS records
-az network private-dns record-set a list --zone-name <zone> --resource-group <rg> --output table
-
-# Get VNet links
-az network private-dns link vnet list --zone-name <zone> --resource-group <rg> --output table
-
-# Get Load Balancer details
-az network lb show --name <lb-name> --resource-group <rg> --output json
-
-# Get NSG rules
-az network nsg rule list --nsg-name <nsg-name> --resource-group <rg> --output table
+**Step 2:** Test from Databricks
+```python
+# Run DNS diagnostics to verify
+exec(requests.get("...02_dns_diagnostics.py").text)
 ```
 
 ---
 
-## 📚 Additional Resources
+### **Example 3: Serverless Storage Issues**
 
-- [Azure Private Link Documentation](https://docs.microsoft.com/azure/private-link/)
-- [Databricks Serverless Network Security](https://learn.microsoft.com/en-us/azure/databricks/security/network/serverless-network-security/pl-to-internal-network)
-- [Azure Private DNS Zones](https://docs.microsoft.com/azure/dns/private-dns-overview)
-- [Troubleshooting Private Endpoints](https://docs.microsoft.com/azure/private-link/troubleshoot-private-endpoint-connectivity)
-
----
-
-## 🔄 Version History
-
-- **v2.0** - Enhanced version with comprehensive diagnostics
-- **v1.0** - Basic diagnostics
+**Step 1:** Run serverless diagnostics
+```python
+# In Databricks notebook with Serverless compute
+exec(requests.get("...03_serverless_diagnostics.py").text)
+```
 
 ---
 
-## 📝 License
+## 📊 Script Comparison Matrix
 
-These scripts are provided as-is for troubleshooting purposes.
+| Script | Scope | Run From | Time | Best For |
+|--------|-------|----------|------|----------|
+| 01_private_link_diagnostics.py | Private Link | Databricks | 2 min | Internal resource connectivity |
+| 02_dns_diagnostics.py | DNS | Databricks | 30 sec | DNS resolution issues |
+| 03_serverless_diagnostics.py | Serverless | Databricks | 1 min | Serverless networking |
+| 01_private_link_validation.sh | Private Link | Azure VM | 2 min | Infrastructure comparison |
+| 02_classic_compute_vnet_nsg.sh | VNet/NSG | Azure CLI | 1 min | VNet injection validation |
+
+---
+
+## 💡 Best Practices
+
+1. **Start Simple**: Begin with DNS diagnostics (02)
+2. **Go Deeper**: Use focused scripts for specific issues
+3. **Compare Environments**: Run both Databricks and Azure CLI scripts
+4. **Save Results**: JSON output from all scripts - save for comparison
+5. **Incremental Testing**: Fix one thing at a time, re-test
+
+---
+
+## 🆘 Common Workflows
+
+### **Workflow 1: New Private Link Setup**
+1. Run `02_dns_diagnostics.py` → Check DNS resolution
+2. Run `01_private_link_diagnostics.py` → Detailed Private Link test
+3. If failing, run `01_private_link_validation.sh` from Azure VM
+4. Compare results to isolate issue
+
+### **Workflow 2: VNet Injection Setup**
+1. Run `02_classic_compute_vnet_nsg.sh` → Validate infrastructure
+2. Fix any NSG/delegation issues found
+3. Run `02_dns_diagnostics.py` → Verify from Databricks perspective
+
+### **Workflow 3: Serverless Issues**
+1. Run `03_serverless_diagnostics.py` → Check serverless connectivity
+2. If storage fails, check DNS with `02_dns_diagnostics.py`
+3. Validate Azure side with CLI scripts
+
+---
+
+## 📖 Documentation
+
+- **Databricks Scripts**: See `databricks_notebooks/README.md`
+- **Azure CLI Scripts**: See `azure_cli_scripts/README.md`
+- **Troubleshooting Guide**: See `docs/TROUBLESHOOTING_FLOWCHART.md`
+- **Quick Reference**: See `docs/CHEAT_SHEET.txt`
+
+---
+
+## 🔗 Links
+
+- **GitHub**: https://github.com/prabakar2610/Databricks/tree/master/pvtlink_network_analysis
+- **Microsoft Docs**: https://learn.microsoft.com/en-us/azure/databricks/security/network/
+
+---
+
+## ✨ What's New (v3.0)
+
+**New Modular Structure:**
+- ✅ Split into databricks_notebooks/ and azure_cli_scripts/
+- ✅ Focused scripts by topic (Private Link, DNS, Serverless, VNet/NSG)
+- ✅ Separate READMEs for each folder
+- ✅ Easier to find and use the right script
+
+**Legacy Scripts:**
+- Original comprehensive scripts moved to `databricks_notebooks/01_private_link_diagnostics.py`
+- All documentation preserved in `docs/` folder
+
+---
+
+## 🎓 Learning Path
+
+**Beginner:**
+1. Read this README
+2. Read `databricks_notebooks/README.md`
+3. Try `02_dns_diagnostics.py` (simplest script)
+
+**Intermediate:**
+1. Use `01_private_link_diagnostics.py` for specific issues
+2. Learn Azure CLI scripts for infrastructure validation
+3. Read troubleshooting flowchart
+
+**Advanced:**
+1. Combine multiple scripts for comprehensive analysis
+2. Automate with your own wrapper scripts
+3. Extend with custom tests
+
+---
+
+## 📝 Migration from v2.0
+
+**Old Way:**
+```python
+# Single large script
+exec(requests.get(".../databricks_private_link_diagnostics_enhanced.py").text)
+```
+
+**New Way:**
+```python
+# Focused scripts
+exec(requests.get(".../databricks_notebooks/02_dns_diagnostics.py").text)  # DNS only
+exec(requests.get(".../databricks_notebooks/01_private_link_diagnostics.py").text)  # Private Link
+```
+
+**Benefits:**
+- Faster (smaller scripts)
+- Easier to configure (fewer options)
+- More maintainable
+
+---
+
+**Version:** 3.0  
+**Last Updated:** 2026-01-24  
+**Maintained by:** Network Diagnostics Team

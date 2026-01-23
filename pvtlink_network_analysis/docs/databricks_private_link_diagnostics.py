@@ -25,17 +25,17 @@ from datetime import datetime
 
 # List of domains/services you're trying to reach
 DOMAINS_TO_TEST = [
-    {"host": "api.internal.yourdomain.com", "port": 443},
-    {"host": "api.internal.yourdomain.com", "port": 80},
+    {"host": "api.internal.contoso.com", "port": 443},
+    {"host": "api.internal.contoso.com", "port": 80},
     # Add more domains as needed:
     # {"host": "your-service.your-domain.com", "port": 8080},
 ]
 
 # Your Private DNS Zone name (as configured in Azure)
-PRIVATE_DNS_ZONE = "internal.yourdomain.com"
+PRIVATE_DNS_ZONE = "internal.contoso.com"
 
 # Domain configured in NCC (Databricks Network Connectivity Config)
-NCC_DOMAIN = "internal.yourdomain.com"
+NCC_DOMAIN = "internal.contoso.com"
 
 # Expected private IP range (first 2 octets, e.g., "10.0" for 10.0.x.x)
 EXPECTED_PRIVATE_IP_PREFIX = "10.0"

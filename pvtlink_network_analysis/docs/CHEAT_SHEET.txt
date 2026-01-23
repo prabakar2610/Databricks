@@ -76,8 +76,8 @@ MOST COMMON CAUSE: Private DNS Zone name ≠ NCC Domain name
 
 Quick Check:
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ Private DNS Zone:  internal.yourdomain.com                                 │
-│ NCC Domain:        internal.yourdomain.com                                 │
+│ Private DNS Zone:  internal.contoso.com                                 │
+│ NCC Domain:        internal.contoso.com                                 │
 │                                                                          │
 │ Do they match EXACTLY? ✅ YES → Continue to next check                  │
 │                        ❌ NO  → THIS IS YOUR PROBLEM!                   │
@@ -91,7 +91,7 @@ Fix Steps:
      - No protocol (https://)
      - No wildcards (*)
      - No specific hostname
-     - Just the zone: internal.yourdomain.com
+     - Just the zone: internal.contoso.com
   5. Save and wait 5-10 minutes
   6. Restart Databricks cluster
   7. Re-run test
@@ -174,29 +174,29 @@ Quick Checks:
 
 Domain Configuration:
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ ✅ CORRECT:   api.internal.yourdomain.com                                  │
+│ ✅ CORRECT:   api.internal.contoso.com                                  │
 │                                                                          │
-│ ❌ WRONG:     https://api.internal.yourdomain.com  (no protocol)           │
-│ ❌ WRONG:     *.internal.yourdomain.com            (no wildcards)          │
+│ ❌ WRONG:     https://api.internal.contoso.com  (no protocol)           │
+│ ❌ WRONG:     *.internal.contoso.com            (no wildcards)          │
 │ ❌ WRONG:     api                                (not FQDN)             │
 └─────────────────────────────────────────────────────────────────────────┘
 
 Private DNS Zone Configuration:
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ ✅ CORRECT:   internal.yourdomain.com              (zone suffix only)      │
+│ ✅ CORRECT:   internal.contoso.com              (zone suffix only)      │
 │                                                                          │
-│ ❌ WRONG:     api.internal.yourdomain.com          (specific hostname)     │
-│ ❌ WRONG:     https://internal.yourdomain.com      (no protocol)           │
+│ ❌ WRONG:     api.internal.contoso.com          (specific hostname)     │
+│ ❌ WRONG:     https://internal.contoso.com      (no protocol)           │
 └─────────────────────────────────────────────────────────────────────────┘
 
 NCC Domain Configuration:
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ ✅ CORRECT:   internal.yourdomain.com              (zone name only)        │
+│ ✅ CORRECT:   internal.contoso.com              (zone name only)        │
 │                                                                          │
-│ ❌ WRONG:     https://internal.yourdomain.com      (no protocol)           │
-│ ❌ WRONG:     *.internal.yourdomain.com            (no wildcards)          │
-│ ❌ WRONG:     api.internal.yourdomain.com          (no hostname)           │
-│ ❌ WRONG:     internal.yourdomain.com/             (no trailing slash)     │
+│ ❌ WRONG:     https://internal.contoso.com      (no protocol)           │
+│ ❌ WRONG:     *.internal.contoso.com            (no wildcards)          │
+│ ❌ WRONG:     api.internal.contoso.com          (no hostname)           │
+│ ❌ WRONG:     internal.contoso.com/             (no trailing slash)     │
 │                                                                          │
 │ 🔥 MUST MATCH Private DNS Zone name EXACTLY!                            │
 └─────────────────────────────────────────────────────────────────────────┘
