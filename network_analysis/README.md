@@ -1,271 +1,266 @@
-# Azure Databricks Network Diagnostics - Modular Suite
+# Azure Databricks Network Diagnostics Suite
 
-Comprehensive, modular network diagnostics for Azure Databricks.  
-Split into focused scripts by topic and environment (Databricks vs Azure CLI).
+Comprehensive, modular network diagnostic tools for Azure Databricks.  
+**Each script has its own folder with detailed README and usage instructions.**
+
+---
 
 ## 📁 Folder Structure
 
 ```
 network_analysis/
-├── databricks_notebooks/           # Scripts for Databricks Notebooks
-│   ├── 01_private_link_diagnostics.py   ⭐ Comprehensive Private Link testing
-│   ├── 02_dns_diagnostics.py            DNS configuration validation
-│   ├── 03_serverless_diagnostics.py     Serverless compute networking
-│   └── README.md                        Detailed notebook scripts guide
+├── databricks_notebooks/              # Python scripts for Databricks Notebooks
+│   ├── private_link_diagnostics/      ⭐ Comprehensive Private Link testing
+│   │   ├── script.py
+│   │   └── README.md                  📖 Complete usage guide
+│   ├── dns_diagnostics/               DNS configuration validation
+│   │   ├── script.py
+│   │   └── README.md                  📖 Complete usage guide
+│   ├── serverless_diagnostics/        Serverless compute networking
+│   │   ├── script.py
+│   │   └── README.md                  📖 Complete usage guide
+│   └── README.md                      Overview of all Databricks scripts
 │
-├── azure_cli_scripts/              # Scripts for Azure CLI (infrastructure)
-│   ├── 01_private_link_validation.sh    Azure VM validation script
-│   ├── 02_classic_compute_vnet_nsg.sh   VNet injection & NSG validation
-│   └── README.md                        Detailed CLI scripts guide
+├── azure_cli_scripts/                 # Bash scripts for Azure CLI
+│   ├── private_link_validation/       Azure VM validation script
+│   │   ├── script.sh
+│   │   └── README.md                  📖 Complete usage guide
+│   ├── classic_compute_validation/    VNet injection & NSG validation
+│   │   ├── script.sh
+│   │   └── README.md                  📖 Complete usage guide
+│   └── README.md                      Overview of all Azure CLI scripts
 │
-├── docs/                           # Documentation (legacy)
-│   ├── START_HERE.md
-│   ├── TROUBLESHOOTING_FLOWCHART.md
-│   ├── CHEAT_SHEET.txt
-│   └── ... (other guides)
+├── docs/                              # Legacy documentation
+│   └── ... (archived guides)
 │
-└── README.md                       # This file
+└── README.md                          # This file
 ```
 
 ---
 
-## 🎯 Quick Start
+## 🎯 Quick Navigation
 
-### **1. For Databricks Issues**
+### **By Problem Type**
 
-Use scripts in `databricks_notebooks/` - run directly in Databricks notebooks:
+| Your Problem | Go To Folder | README |
+|--------------|--------------|--------|
+| Cannot connect to internal API/database | [databricks_notebooks/private_link_diagnostics/](databricks_notebooks/private_link_diagnostics/) | [📖](databricks_notebooks/private_link_diagnostics/README.md) |
+| DNS not resolving correctly | [databricks_notebooks/dns_diagnostics/](databricks_notebooks/dns_diagnostics/) | [📖](databricks_notebooks/dns_diagnostics/README.md) |
+| Serverless can't reach storage | [databricks_notebooks/serverless_diagnostics/](databricks_notebooks/serverless_diagnostics/) | [📖](databricks_notebooks/serverless_diagnostics/README.md) |
+| Cluster launch failures | [azure_cli_scripts/classic_compute_validation/](azure_cli_scripts/classic_compute_validation/) | [📖](azure_cli_scripts/classic_compute_validation/README.md) |
+| Compare VM vs Databricks connectivity | [azure_cli_scripts/private_link_validation/](azure_cli_scripts/private_link_validation/) | [📖](azure_cli_scripts/private_link_validation/README.md) |
 
-```python
-# Example: Test Private Link connectivity
-import requests
-URL = "https://raw.githubusercontent.com/prabakar2610/Databricks/master/network_analysis/databricks_notebooks/01_private_link_diagnostics.py"
-exec(requests.get(URL).text)
-```
+### **By Environment**
 
-### **2. For Infrastructure Validation**
+**Running in Databricks Notebook?**  
+→ [databricks_notebooks/](databricks_notebooks/)
 
-Use scripts in `azure_cli_scripts/` - run from terminal with Azure CLI:
-
-```bash
-cd azure_cli_scripts
-./02_classic_compute_vnet_nsg.sh
-```
+**Running from Terminal/VM?**  
+→ [azure_cli_scripts/](azure_cli_scripts/)
 
 ---
 
-## 📋 Choose the Right Script
+## 🚀 Quick Start Examples
 
-### **Problem: Can't connect to internal API/database**
-→ Use: `databricks_notebooks/01_private_link_diagnostics.py`
+### **Example 1: Test Private Link from Databricks**
 
-### **Problem: DNS not resolving correctly**
-→ Use: `databricks_notebooks/02_dns_diagnostics.py`
-
-### **Problem: Serverless can't reach storage**
-→ Use: `databricks_notebooks/03_serverless_diagnostics.py`
-
-### **Problem: Need to validate VNet/NSG configuration**
-→ Use: `azure_cli_scripts/02_classic_compute_vnet_nsg.sh`
-
-### **Problem: Compare Azure VM vs Databricks connectivity**
-→ Use both:
-  - `azure_cli_scripts/01_private_link_validation.sh` (on Azure VM)
-  - `databricks_notebooks/01_private_link_diagnostics.py` (in Databricks)
-
----
-
-## 🎨 Design Philosophy
-
-### **Modular Approach**
-- ✅ Small, focused scripts by topic
-- ✅ Use only what you need
-- ✅ Easy to maintain and extend
-- ✅ No massive monolithic scripts
-
-### **Environment Separation**
-- **Databricks Notebooks**: Test from Databricks perspective (Python)
-- **Azure CLI Scripts**: Test from Azure infrastructure perspective (Bash)
-
-### **Benefits**
-1. Faster execution (smaller scripts)
-2. Easier troubleshooting (focused scope)
-3. Better organization (logical grouping)
-4. Simpler configuration (only relevant settings)
-
----
-
-## 🚀 Usage Examples
-
-### **Example 1: Private Link Not Working**
-
-**Step 1:** Run DNS diagnostics
 ```python
 # In Databricks notebook
-import requests
-exec(requests.get("https://raw.githubusercontent.com/prabakar2610/Databricks/master/network_analysis/databricks_notebooks/02_dns_diagnostics.py").text)
-```
-
-**Step 2:** If DNS shows public IP, run detailed Private Link diagnostics
-```python
-# Configure
-DOMAINS_TO_TEST = [{"host": "api.yourdomain.com", "port": 443}]
+DOMAINS_TO_TEST = [{"host": "api.yourdomain.com", "port": 443, "description": "API"}]
 PRIVATE_DNS_ZONE = "yourdomain.com"
 NCC_DOMAIN = "yourdomain.com"
+EXPECTED_PRIVATE_IP_PREFIX = "10.0"
 
-# Run
-exec(requests.get("https://raw.githubusercontent.com/prabakar2610/Databricks/master/network_analysis/databricks_notebooks/01_private_link_diagnostics.py").text)
+import requests
+exec(requests.get("https://raw.githubusercontent.com/prabakar2610/Databricks/master/network_analysis/databricks_notebooks/private_link_diagnostics/script.py").text)
 ```
 
-**Step 3:** Compare with Azure VM
-```bash
-# On Azure VM in same VNet
-./azure_cli_scripts/01_private_link_validation.sh
-```
+📖 [Full Guide](databricks_notebooks/private_link_diagnostics/README.md)
 
 ---
 
-### **Example 2: VNet Injection Issues**
+### **Example 2: Quick DNS Check**
 
-**Step 1:** Validate infrastructure
-```bash
-# Edit configuration
-nano azure_cli_scripts/02_classic_compute_vnet_nsg.sh
-
-# Run validation
-./azure_cli_scripts/02_classic_compute_vnet_nsg.sh
-```
-
-**Step 2:** Test from Databricks
 ```python
-# Run DNS diagnostics to verify
-exec(requests.get("...02_dns_diagnostics.py").text)
+# In Databricks notebook - no configuration needed
+import requests
+exec(requests.get("https://raw.githubusercontent.com/prabakar2610/Databricks/master/network_analysis/databricks_notebooks/dns_diagnostics/script.py").text)
 ```
+
+📖 [Full Guide](databricks_notebooks/dns_diagnostics/README.md)
 
 ---
 
-### **Example 3: Serverless Storage Issues**
+### **Example 3: Validate VNet Configuration**
 
-**Step 1:** Run serverless diagnostics
-```python
-# In Databricks notebook with Serverless compute
-exec(requests.get("...03_serverless_diagnostics.py").text)
+```bash
+# From terminal with Azure CLI
+curl -o check.sh https://raw.githubusercontent.com/prabakar2610/Databricks/master/network_analysis/azure_cli_scripts/classic_compute_validation/script.sh
+chmod +x check.sh
+./check.sh --resource-group "my-rg" --vnet-name "my-vnet" --public-subnet "public" --private-subnet "private"
 ```
+
+📖 [Full Guide](azure_cli_scripts/classic_compute_validation/README.md)
 
 ---
 
 ## 📊 Script Comparison Matrix
 
-| Script | Scope | Run From | Time | Best For |
-|--------|-------|----------|------|----------|
-| 01_private_link_diagnostics.py | Private Link | Databricks | 2 min | Internal resource connectivity |
-| 02_dns_diagnostics.py | DNS | Databricks | 30 sec | DNS resolution issues |
-| 03_serverless_diagnostics.py | Serverless | Databricks | 1 min | Serverless networking |
-| 01_private_link_validation.sh | Private Link | Azure VM | 2 min | Infrastructure comparison |
-| 02_classic_compute_vnet_nsg.sh | VNet/NSG | Azure CLI | 1 min | VNet injection validation |
+| Script | Run From | Time | Best For | README |
+|--------|----------|------|----------|--------|
+| **Private Link Diagnostics** | Databricks | 2 min | Internal resource connectivity | [📖](databricks_notebooks/private_link_diagnostics/README.md) |
+| **DNS Diagnostics** | Databricks | 30 sec | DNS resolution issues | [📖](databricks_notebooks/dns_diagnostics/README.md) |
+| **Serverless Diagnostics** | Databricks | 1 min | Serverless networking | [📖](databricks_notebooks/serverless_diagnostics/README.md) |
+| **Private Link Validation** | Azure VM | 2 min | Infrastructure comparison | [📖](azure_cli_scripts/private_link_validation/README.md) |
+| **Classic Compute Validation** | Azure CLI | 1 min | VNet injection validation | [📖](azure_cli_scripts/classic_compute_validation/README.md) |
 
 ---
 
-## 💡 Best Practices
+## 💡 How to Use This Repository
 
-1. **Start Simple**: Begin with DNS diagnostics (02)
-2. **Go Deeper**: Use focused scripts for specific issues
-3. **Compare Environments**: Run both Databricks and Azure CLI scripts
-4. **Save Results**: JSON output from all scripts - save for comparison
-5. **Incremental Testing**: Fix one thing at a time, re-test
+### **Step 1: Identify Your Problem**
+
+Use the "By Problem Type" table above to find the right script.
+
+### **Step 2: Navigate to Script Folder**
+
+Each script has its own folder with:
+- ✅ **script.py** or **script.sh** - The actual script
+- ✅ **README.md** - Comprehensive usage guide, troubleshooting, examples
+
+### **Step 3: Read the README**
+
+Each README contains:
+- 📋 Overview and when to use
+- 🚀 Multiple usage methods (copy-paste, GitHub URL, download)
+- ⚙️ Configuration parameters
+- 📊 What it tests
+- 📤 Sample output
+- 🆘 Troubleshooting common issues
+- 💡 Tips and best practices
+- 📖 Related documentation
+
+### **Step 4: Run the Script**
+
+Follow the usage instructions in the specific README.
 
 ---
 
-## 🆘 Common Workflows
+## 🆘 Common Troubleshooting Workflows
 
-### **Workflow 1: New Private Link Setup**
-1. Run `02_dns_diagnostics.py` → Check DNS resolution
-2. Run `01_private_link_diagnostics.py` → Detailed Private Link test
-3. If failing, run `01_private_link_validation.sh` from Azure VM
-4. Compare results to isolate issue
+### **Workflow 1: Private Link Not Working**
 
-### **Workflow 2: VNet Injection Setup**
-1. Run `02_classic_compute_vnet_nsg.sh` → Validate infrastructure
-2. Fix any NSG/delegation issues found
-3. Run `02_dns_diagnostics.py` → Verify from Databricks perspective
+1. **DNS Diagnostics** ([📖](databricks_notebooks/dns_diagnostics/README.md))
+   - Check if DNS resolves to private IP
+   
+2. **Private Link Validation on VM** ([📖](azure_cli_scripts/private_link_validation/README.md))
+   - Verify infrastructure works from VM
+   
+3. **Private Link Diagnostics in Databricks** ([📖](databricks_notebooks/private_link_diagnostics/README.md))
+   - Detailed Databricks-side testing
+   
+4. **Compare Results**
+   - If VM passes but Databricks fails → Databricks config issue
+   - If both fail → Infrastructure issue
+
+---
+
+### **Workflow 2: New Workspace Setup**
+
+1. **Classic Compute Validation** ([📖](azure_cli_scripts/classic_compute_validation/README.md))
+   - Validate VNet/NSG before workspace creation
+   
+2. **Fix Issues** (if any)
+   - Correct NSG rules
+   - Fix subnet delegation
+   
+3. **Create Workspace**
+   
+4. **DNS Diagnostics** ([📖](databricks_notebooks/dns_diagnostics/README.md))
+   - Verify workspace connectivity
+
+---
 
 ### **Workflow 3: Serverless Issues**
-1. Run `03_serverless_diagnostics.py` → Check serverless connectivity
-2. If storage fails, check DNS with `02_dns_diagnostics.py`
-3. Validate Azure side with CLI scripts
+
+1. **Serverless Diagnostics** ([📖](databricks_notebooks/serverless_diagnostics/README.md))
+   - Check serverless compute networking
+   
+2. **DNS Diagnostics** ([📖](databricks_notebooks/dns_diagnostics/README.md))
+   - If storage access fails, check DNS
 
 ---
 
-## 📖 Documentation
+## 🎨 Design Philosophy
 
-- **Databricks Scripts**: See `databricks_notebooks/README.md`
-- **Azure CLI Scripts**: See `azure_cli_scripts/README.md`
-- **Troubleshooting Guide**: See `docs/TROUBLESHOOTING_FLOWCHART.md`
-- **Quick Reference**: See `docs/CHEAT_SHEET.txt`
+### **Why Individual Folders?**
+
+✅ **Organized** - Easy to find what you need  
+✅ **Comprehensive** - Each README is a complete guide  
+✅ **Self-contained** - Everything in one place  
+✅ **Maintainable** - Update one script without affecting others  
+✅ **Discoverable** - Clear structure for new users
+
+### **Benefits**
+
+1. ✅ No massive monolithic scripts
+2. ✅ Detailed troubleshooting per script
+3. ✅ Faster execution (smaller, focused scripts)
+4. ✅ Use only what you need
+5. ✅ Easy to share individual scripts
+
+---
+
+## 📖 Additional Resources
+
+### **Overview READMEs**
+
+- **All Databricks Scripts**: [databricks_notebooks/README.md](databricks_notebooks/README.md)
+- **All Azure CLI Scripts**: [azure_cli_scripts/README.md](azure_cli_scripts/README.md)
+
+### **Individual Script READMEs**
+
+Each script folder contains a complete README with:
+- Detailed usage instructions
+- Configuration examples
+- Troubleshooting guides
+- Sample outputs
+- Related documentation links
+
+### **Microsoft Documentation**
+
+- [Azure Databricks Networking](https://learn.microsoft.com/en-us/azure/databricks/security/network/)
+- [Private Link for Databricks](https://learn.microsoft.com/en-us/azure/databricks/security/network/serverless-network-security/pl-to-internal-network)
+- [Serverless Networking](https://learn.microsoft.com/en-us/azure/databricks/security/network/serverless-network-security/)
+- [VNet Injection](https://learn.microsoft.com/en-us/azure/databricks/security/network/classic/vnet-inject)
 
 ---
 
 ## 🔗 Links
 
-- **GitHub**: https://github.com/prabakar2610/Databricks/tree/master/network_analysis
-- **Microsoft Docs**: https://learn.microsoft.com/en-us/azure/databricks/security/network/
+- **GitHub Repository**: https://github.com/prabakar2610/Databricks
+- **Repository Root**: [../](../)
+- **Docker Tools**: [../docker/](../docker/)
 
 ---
 
-## ✨ What's New (v3.0)
+## ✨ What's New in v4.0
 
-**New Modular Structure:**
-- ✅ Split into databricks_notebooks/ and azure_cli_scripts/
-- ✅ Focused scripts by topic (Private Link, DNS, Serverless, VNet/NSG)
-- ✅ Separate READMEs for each folder
-- ✅ Easier to find and use the right script
+**Major Reorganization:**
+- ✅ Each script in its own folder
+- ✅ Comprehensive README per script
+- ✅ Better organization and discoverability
+- ✅ Self-contained documentation
+- ✅ Easier to navigate and use
 
-**Legacy Scripts:**
-- Original comprehensive scripts moved to `databricks_notebooks/01_private_link_diagnostics.py`
-- All documentation preserved in `docs/` folder
-
----
-
-## 🎓 Learning Path
-
-**Beginner:**
-1. Read this README
-2. Read `databricks_notebooks/README.md`
-3. Try `02_dns_diagnostics.py` (simplest script)
-
-**Intermediate:**
-1. Use `01_private_link_diagnostics.py` for specific issues
-2. Learn Azure CLI scripts for infrastructure validation
-3. Read troubleshooting flowchart
-
-**Advanced:**
-1. Combine multiple scripts for comprehensive analysis
-2. Automate with your own wrapper scripts
-3. Extend with custom tests
+**Previous versions:**
+- v3.0: Modular scripts split by topic
+- v2.0: Enhanced diagnostics
+- v1.0: Initial comprehensive script
 
 ---
 
-## 📝 Migration from v2.0
-
-**Old Way:**
-```python
-# Single large script
-exec(requests.get(".../databricks_private_link_diagnostics_enhanced.py").text)
-```
-
-**New Way:**
-```python
-# Focused scripts
-exec(requests.get(".../databricks_notebooks/02_dns_diagnostics.py").text)  # DNS only
-exec(requests.get(".../databricks_notebooks/01_private_link_diagnostics.py").text)  # Private Link
-```
-
-**Benefits:**
-- Faster (smaller scripts)
-- Easier to configure (fewer options)
-- More maintainable
-
----
-
-**Version:** 3.0  
+**Version:** 4.0  
 **Last Updated:** 2026-01-24  
+**Organization:** Individual folders with comprehensive READMEs  
 **Maintained by:** Network Diagnostics Team

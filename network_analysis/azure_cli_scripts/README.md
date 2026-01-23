@@ -1,255 +1,124 @@
 # Azure CLI Scripts - Network Diagnostics
 
-This folder contains Azure CLI scripts for diagnosing Azure Databricks networking from **Azure perspective** (infrastructure validation).
-
-## 📋 Available Scripts
-
-### 1. **01_private_link_validation.sh**
-**Validate Private Link setup from Azure VM**
-
-**Use Case:** Compare connectivity from Azure VM vs Databricks to isolate issues
-
-**Tests:**
-- DNS resolution with multiple tools (dig, nslookup, host)
-- TCP connectivity
-- Azure metadata inspection
-- Traceroute (optional)
-- Port scanning (optional)
-
-**Run On:** Azure VM in same VNet as Private Endpoint
-
-**Time:** ~1-2 minutes
+Azure CLI and bash scripts for infrastructure-level network validation.
 
 ---
 
-### 2. **02_classic_compute_vnet_nsg.sh** ⭐
-**Validate VNet injection configuration**
+## 📁 Available Scripts
 
-**Use Case:** Verify VNet injection, NSG rules, and UDR configuration
+Each script has its own folder with detailed README and usage instructions.
 
-**Tests:**
-- Workspace VNet injection status
-- VNet and subnet configuration
-- Subnet delegations
-- NSG rules validation
-- Route table configuration
-
-**Run On:** Any machine with Azure CLI (local or Cloud Shell)
-
-**Time:** ~1 minute
-
-**Prerequisites:**
-- Azure CLI logged in
-- Read permissions on network resources
+| Script | Purpose | Environment | README |
+|--------|---------|-------------|--------|
+| **Private Link Validation** | VM-based Private Link testing | Azure VM / Cloud Shell | [📖 README](private_link_validation/README.md) |
+| **Classic Compute Validation** | VNet injection and NSG validation | Azure CLI / Terminal | [📖 README](classic_compute_validation/README.md) |
 
 ---
 
-## 🚀 How to Use
+## 🚀 Quick Start
 
-### **Setup**
-
-1. Install Azure CLI:
+### **Private Link Validation** (Compare VM vs Databricks)
 ```bash
-# macOS
-brew install azure-cli
+# Run on Azure VM in same VNet as Databricks
+curl -o test.sh https://raw.githubusercontent.com/prabakar2610/Databricks/master/network_analysis/azure_cli_scripts/private_link_validation/script.sh
+chmod +x test.sh
 
-# Linux
-curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-
-# Windows
-# Download from https://aka.ms/installazurecliwindows
-```
-
-2. Login:
-```bash
-az login
-az account set --subscription "your-subscription-id"
-```
-
-3. Make scripts executable:
-```bash
-chmod +x *.sh
-```
-
-### **Running Scripts**
-
-```bash
-# Edit configuration in script
-nano 02_classic_compute_vnet_nsg.sh
+# Edit configuration
+nano test.sh
 
 # Run
-./02_classic_compute_vnet_nsg.sh
+./test.sh
 ```
+[📖 Full Documentation](private_link_validation/README.md)
+
+---
+
+### **Classic Compute Validation** (VNet/NSG Check)
+```bash
+# Run from terminal with Azure CLI
+curl -o check.sh https://raw.githubusercontent.com/prabakar2610/Databricks/master/network_analysis/azure_cli_scripts/classic_compute_validation/script.sh
+chmod +x check.sh
+
+# Run with parameters
+./check.sh --resource-group "my-rg" --vnet-name "my-vnet" --public-subnet "public" --private-subnet "private"
+```
+[📖 Full Documentation](classic_compute_validation/README.md)
 
 ---
 
 ## 📊 When to Use Each Script
 
-| Scenario | Use This Script |
-|----------|----------------|
-| Compare Databricks vs Azure VM connectivity | `01_private_link_validation.sh` |
-| Validate VNet injection setup | `02_classic_compute_vnet_nsg.sh` |
-| Check NSG rules | `02_classic_compute_vnet_nsg.sh` |
-| Verify subnet delegations | `02_classic_compute_vnet_nsg.sh` |
-| Validate UDR configuration | `02_classic_compute_vnet_nsg.sh` |
-
----
-
-## 🎯 Script Comparison
-
-| Feature | Private Link Validation | VNet/NSG Validation |
-|---------|------------------------|---------------------|
-| DNS Testing | ✅ Multi-tool | ❌ |
-| TCP Testing | ✅ | ❌ |
-| VNet Configuration | ❌ | ✅ |
-| NSG Rules | ❌ | ✅ |
-| Subnet Delegation | ❌ | ✅ |
-| Route Tables | ❌ | ✅ |
-| Requires Azure VM | ✅ | ❌ |
-| Requires Azure CLI | ❌ | ✅ |
-
----
-
-## ⚙️ Configuration
-
-### **Private Link Validation Script**
-
-```bash
-# In 01_private_link_validation.sh
-
-DOMAINS_TO_TEST=(
-    "api.yourdomain.com:443"
-    "database.yourdomain.com:1433"
-)
-
-PRIVATE_DNS_ZONE="yourdomain.com"
-EXPECTED_LB_IP="10.0.1.100"
-EXPECTED_IP_PREFIX="10.0"
-```
-
-### **VNet/NSG Validation Script**
-
-```bash
-# In 02_classic_compute_vnet_nsg.sh
-
-SUBSCRIPTION_ID="your-subscription-id"
-RESOURCE_GROUP="your-rg"
-WORKSPACE_NAME="your-workspace"
-
-VNET_RESOURCE_GROUP="your-vnet-rg"
-VNET_NAME="your-vnet"
-PUBLIC_SUBNET_NAME="public-subnet"
-PRIVATE_SUBNET_NAME="private-subnet"
-
-VNET_INJECTED=true  # Set to false if standard deployment
-```
-
----
-
-## 🔍 What Each Script Validates
-
-### **Private Link Validation (01)**
-
-✅ DNS resolution consistency  
-✅ Public vs Private IP  
-✅ TCP connectivity  
-✅ Network path (traceroute)  
-✅ Port accessibility  
-✅ Azure VM metadata  
-
-**Output:** Comparison data to identify if issue is Azure infrastructure or Databricks configuration
-
-### **VNet/NSG Validation (02)**
-
-✅ Workspace VNet injection status  
-✅ VNet address spaces  
-✅ Subnet configurations  
-✅ Subnet delegations  
-✅ NSG existence and rules  
-✅ Inbound/Outbound rules  
-✅ Route table configuration  
-
-**Output:** Complete infrastructure validation report
+| Problem | Use This Script |
+|---------|----------------|
+| Compare VM vs Databricks connectivity | [Private Link Validation](private_link_validation/) |
+| Cluster launch failures | [Classic Compute Validation](classic_compute_validation/) |
+| Validate VNet configuration | [Classic Compute Validation](classic_compute_validation/) |
+| Check NSG rules | [Classic Compute Validation](classic_compute_validation/) |
+| Verify subnet delegation | [Classic Compute Validation](classic_compute_validation/) |
+| Baseline infrastructure testing | [Private Link Validation](private_link_validation/) |
 
 ---
 
 ## 💡 Best Practices
 
-1. **Run Private Link validation from Azure VM** in same VNet as your resources
-2. **Compare results** between Azure VM and Databricks tests
-3. **Save outputs** to files for comparison:
-   ```bash
-   ./02_classic_compute_vnet_nsg.sh > vnet_validation_$(date +%Y%m%d).txt
-   ```
-4. **Check permissions** before running (need read access to network resources)
-5. **Use Cloud Shell** if you don't have Azure CLI locally
+1. **Run before Databricks tests** - Validate infrastructure first
+2. **Use Private Link Validation for comparison** - Isolate Databricks-specific issues
+3. **Run Classic Compute Validation during setup** - Catch configuration errors early
+4. **Save script output** - Keep for compliance and documentation
+5. **Read individual READMEs** - Each script has detailed troubleshooting guide
 
 ---
 
-## 🆘 Troubleshooting
+## 🔍 Comparison: Databricks vs Azure CLI Scripts
 
-**"az: command not found"**
-- Azure CLI not installed
-- Install following setup instructions above
-
-**"Authorization failed"**
-- Not logged in: `az login`
-- Wrong subscription: `az account set --subscription "your-sub-id"`
-- Insufficient permissions: Need Network Contributor or Reader role
-
-**"Resource not found"**
-- Check resource names in configuration
-- Verify subscription and resource group
-- Check if resources exist: `az resource list --resource-group your-rg`
-
-**NSG rules not showing**
-- NSG might not be attached to subnet
-- Check NSG exists: `az network nsg list --output table`
+| Aspect | Databricks Notebooks | Azure CLI Scripts |
+|--------|---------------------|-------------------|
+| **Run From** | Databricks notebook | Terminal / VM |
+| **Tests** | Databricks perspective | Infrastructure perspective |
+| **Use Case** | Application-level | Infrastructure-level |
+| **Best For** | Runtime issues | Setup/config validation |
 
 ---
 
-## 📖 Required Permissions
+## 🆘 Common Workflow
 
-**Minimum Azure RBAC roles:**
-- **Network Contributor** (preferred) - full network resource access
-- **Reader** (minimum) - read-only network resource access
+### **Troubleshooting Private Link Issues**
 
-**Specific permissions needed:**
-- `Microsoft.Network/*/read`
-- `Microsoft.Databricks/workspaces/read`
+1. **Run Classic Compute Validation** (if using VNet injection)
+   - Validates infrastructure setup
+   - Checks NSG rules
+   
+2. **Run Private Link Validation on Azure VM**
+   - Tests from infrastructure perspective
+   - Establishes baseline
+   
+3. **Run Databricks Private Link Diagnostics**
+   - Tests from Databricks perspective
+   - Compare with VM results
 
----
+### **Setting Up New Workspace**
 
-## 🔗 Related Azure CLI Commands
-
-```bash
-# List workspaces
-az databricks workspace list --output table
-
-# Get workspace details
-az databricks workspace show --name <workspace> --resource-group <rg>
-
-# List NSGs
-az network nsg list --output table
-
-# List VNets
-az network vnet list --output table
-
-# List subnets
-az network vnet subnet list --vnet-name <vnet> --resource-group <rg>
-
-# Show route table
-az network route-table show --name <route-table> --resource-group <rg>
-```
+1. **Run Classic Compute Validation**
+   - Before creating workspace
+   - Validates VNet/NSG configuration
+   
+2. **Fix any issues found**
+   - Correct NSG rules
+   - Fix subnet delegation
+   
+3. **Create workspace**
+   - With validated configuration
 
 ---
 
-## 📚 Reference Documentation
+## 🔗 Links
 
-- [Azure CLI Reference](https://docs.microsoft.com/cli/azure/)
-- [Azure Databricks VNet Injection](https://learn.microsoft.com/en-us/azure/databricks/security/network/classic/vnet-inject)
-- [Azure NSG Documentation](https://docs.microsoft.com/azure/virtual-network/network-security-groups-overview)
+- **Main Repository**: https://github.com/prabakar2610/Databricks
+- **Network Analysis Home**: [../](../)
+- **Databricks Notebooks**: [../databricks_notebooks/](../databricks_notebooks/)
 
 ---
 
-**All scripts provide detailed output** with color-coded success/failure indicators!
+**Version:** 4.0  
+**Last Updated:** 2026-01-24  
+**Organization:** Individual folders with dedicated READMEs
