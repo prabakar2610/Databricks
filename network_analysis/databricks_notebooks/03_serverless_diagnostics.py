@@ -112,7 +112,7 @@ def test_connectivity(host: str, port: int, description: str, timeout: int = 5) 
         result["is_private"] = is_private_ip(ip)
         result["dns_time"] = dns_time
         
-        print(f"    IP: {ip} ({'Private' if result['is_private'] else 'Public'})", indent=1)
+        print(f"    IP: {ip} ({'Private' if result['is_private'] else 'Public'})")
         
     except Exception as e:
         result["dns_error"] = str(e)
@@ -158,7 +158,7 @@ def check_compute_type():
             return True
         else:
             print_warning("May not be running on serverless compute")
-            print("   Results may not reflect serverless networking", indent=1)
+            print("   Results may not reflect serverless networking")
             return False
     except:
         print_warning("Could not determine compute type")
@@ -279,10 +279,10 @@ def main():
         
         if external_blocked > 0:
             print_warning(f"External access blocked: {external_blocked}/{len(external_results)} services")
-            print("   Possible causes:", indent=1)
-            print("   • Network policies restricting egress", indent=1)
-            print("   • Firewall rules", indent=1)
-            print("   • Service-specific blocks", indent=1)
+            print("   Possible causes:")
+            print("   • Network policies restricting egress")
+            print("   • Firewall rules")
+            print("   • Service-specific blocks")
         else:
             print_success("All external services reachable")
     

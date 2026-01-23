@@ -103,9 +103,9 @@ def test_dns_resolution(domain: str, description: str = None) -> Dict:
         is_private = is_private_ip(ip)
         
         print_success(f"{desc}", indent=1)
-        print(f"    Domain: {domain}", indent=1)
-        print(f"    IP: {ip} ({'Private' if is_private else 'Public'})", indent=1)
-        print(f"    Time: {elapsed:.3f}s", indent=1)
+        print(f"    Domain: {domain}")
+        print(f"    IP: {ip} ({'Private' if is_private else 'Public'})")
+        print(f"    Time: {elapsed:.3f}s")
         
         return {
             "domain": domain,
