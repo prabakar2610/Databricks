@@ -84,16 +84,16 @@ See quick fixes below or refer to `TROUBLESHOOTING_FLOWCHART.md` for detailed st
 
 **Common Mistakes:**
 ```
-DNS Zone:  internal.contoso.com
-NCC:       contoso.com              ❌ Missing subdomain
+DNS Zone:  internal.yourdomain.com
+NCC:       yourdomain.com              ❌ Missing subdomain
 NCC:       https://internal...      ❌ Has protocol
-NCC:       *.internal.contoso.com   ❌ Has wildcard
+NCC:       *.internal.yourdomain.com   ❌ Has wildcard
 ```
 
 **Correct Format:**
 ```
-DNS Zone:  internal.contoso.com
-NCC:       internal.contoso.com     ✅ Exact match
+DNS Zone:  internal.yourdomain.com
+NCC:       internal.yourdomain.com     ✅ Exact match
 ```
 
 ---
@@ -221,9 +221,9 @@ Run both scripts and compare:
 
 **In DOMAINS_TO_TEST:**
 ```python
-✅ CORRECT:   "api.internal.contoso.com"
-❌ WRONG:     "https://api.internal.contoso.com"  # No protocol
-❌ WRONG:     "*.internal.contoso.com"            # No wildcards
+✅ CORRECT:   "api.internal.yourdomain.com"
+❌ WRONG:     "https://api.internal.yourdomain.com"  # No protocol
+❌ WRONG:     "*.internal.yourdomain.com"            # No wildcards
 ❌ WRONG:     "api"                                # Must be FQDN
 ```
 
@@ -231,21 +231,21 @@ Run both scripts and compare:
 
 **In PRIVATE_DNS_ZONE:**
 ```python
-✅ CORRECT:   "internal.contoso.com"              # Zone suffix only
-❌ WRONG:     "api.internal.contoso.com"          # No specific hostname
-❌ WRONG:     "https://internal.contoso.com"      # No protocol
+✅ CORRECT:   "internal.yourdomain.com"              # Zone suffix only
+❌ WRONG:     "api.internal.yourdomain.com"          # No specific hostname
+❌ WRONG:     "https://internal.yourdomain.com"      # No protocol
 ```
 
 ### **NCC Domain** (Most Critical!)
 
 **In NCC_DOMAIN (and Databricks Console):**
 ```python
-✅ CORRECT:   "internal.contoso.com"              # Zone name only
+✅ CORRECT:   "internal.yourdomain.com"              # Zone name only
 
-❌ WRONG:     "https://internal.contoso.com"      # No protocol
-❌ WRONG:     "*.internal.contoso.com"            # No wildcards
-❌ WRONG:     "api.internal.contoso.com"          # No hostname
-❌ WRONG:     "internal.contoso.com/"             # No trailing slash
+❌ WRONG:     "https://internal.yourdomain.com"      # No protocol
+❌ WRONG:     "*.internal.yourdomain.com"            # No wildcards
+❌ WRONG:     "api.internal.yourdomain.com"          # No hostname
+❌ WRONG:     "internal.yourdomain.com/"             # No trailing slash
 
 🔥 MUST match Private DNS Zone name EXACTLY!
 ```
@@ -395,14 +395,14 @@ Your Backend VMs
 
 ### **How Private DNS Works**
 
-1. You create Private DNS Zone: `internal.contoso.com`
-2. You add A record: `api.internal.contoso.com` → `10.0.1.100`
+1. You create Private DNS Zone: `internal.yourdomain.com`
+2. You add A record: `api.internal.yourdomain.com` → `10.0.1.100`
 3. You link the zone to your VNet
-4. Resources in the VNet now resolve `api.internal.contoso.com` to `10.0.1.100`
+4. Resources in the VNet now resolve `api.internal.yourdomain.com` to `10.0.1.100`
 
 **For Databricks:**
-- You ALSO configure NCC with domain `internal.contoso.com`
-- Databricks internally routes queries for `*.internal.contoso.com` through Private Link
+- You ALSO configure NCC with domain `internal.yourdomain.com`
+- Databricks internally routes queries for `*.internal.yourdomain.com` through Private Link
 - This only works if NCC Domain matches the DNS Zone exactly
 
 ---
@@ -445,8 +445,8 @@ You'll know everything is working when:
 **Fix:** Make sure these match EXACTLY:
 
 ```
-Private DNS Zone:  internal.contoso.com
-NCC Domain:        internal.contoso.com
+Private DNS Zone:  internal.yourdomain.com
+NCC Domain:        internal.yourdomain.com
                    ↑ Must be identical!
 ```
 

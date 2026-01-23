@@ -40,12 +40,12 @@ NC='\033[0m' # No Color
 
 # Domains to test (space-separated)
 DOMAINS_TO_TEST=(
-    "api.internal.contoso.com:443"
-    "api.internal.contoso.com:80"
+    "api.internal.yourdomain.com:443"
+    "api.internal.yourdomain.com:80"
 )
 
 # Private DNS Zone name
-PRIVATE_DNS_ZONE="internal.contoso.com"
+PRIVATE_DNS_ZONE="internal.yourdomain.com"
 
 # Expected Load Balancer private IP
 EXPECTED_LB_IP="10.0.1.100"

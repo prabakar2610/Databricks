@@ -182,9 +182,9 @@ Use the comparison matrix below to interpret your results.
 
 **Example:**
 ```
-✅ CORRECT: api.internal.contoso.com
-❌ WRONG: https://api.internal.contoso.com
-❌ WRONG: *.internal.contoso.com
+✅ CORRECT: api.internal.yourdomain.com
+❌ WRONG: https://api.internal.yourdomain.com
+❌ WRONG: *.internal.yourdomain.com
 ❌ WRONG: api
 ```
 
@@ -194,9 +194,9 @@ Use the comparison matrix below to interpret your results.
 
 **Example:**
 ```
-✅ CORRECT: internal.contoso.com
-❌ WRONG: api.internal.contoso.com
-❌ WRONG: contoso.com (if your services are under internal.contoso.com)
+✅ CORRECT: internal.yourdomain.com
+❌ WRONG: api.internal.yourdomain.com
+❌ WRONG: yourdomain.com (if your services are under internal.yourdomain.com)
 ```
 
 **3. Expected IP Range**

@@ -37,10 +37,10 @@ import requests; exec(requests.get("https://raw.githubusercontent.com/YOUR-USERN
 ```python
 # Your configuration
 DOMAINS_TO_TEST = [
-    {"host": "api.internal.contoso.com", "port": 443, "description": "API Service"},
+    {"host": "api.internal.yourdomain.com", "port": 443, "description": "API Service"},
 ]
-PRIVATE_DNS_ZONE = "internal.contoso.com"
-NCC_DOMAIN = "internal.contoso.com"
+PRIVATE_DNS_ZONE = "internal.yourdomain.com"
+NCC_DOMAIN = "internal.yourdomain.com"
 EXPECTED_PRIVATE_IP_PREFIX = "10.0"
 EXPECTED_LB_PRIVATE_IP = "10.0.1.100"
 
@@ -84,9 +84,9 @@ rm -rf /tmp/pl-diagnostics
 git clone https://github.com/YOUR-USERNAME/YOUR-REPO.git /tmp/pl-diagnostics
 
 # Update configuration
-DOMAINS_TO_TEST = [{"host": "api.internal.contoso.com", "port": 443}]
-PRIVATE_DNS_ZONE = "internal.contoso.com"
-NCC_DOMAIN = "internal.contoso.com"
+DOMAINS_TO_TEST = [{"host": "api.internal.yourdomain.com", "port": 443}]
+PRIVATE_DNS_ZONE = "internal.yourdomain.com"
+NCC_DOMAIN = "internal.yourdomain.com"
 EXPECTED_PRIVATE_IP_PREFIX = "10.0"
 
 # Run the main script
@@ -117,9 +117,9 @@ GITHUB_TOKEN = dbutils.secrets.get(scope="your-scope", key="github-token")
 SCRIPT_URL = "https://raw.githubusercontent.com/YOUR-USERNAME/PRIVATE-REPO/main/databricks_private_link_diagnostics_enhanced.py"
 
 # Configuration
-DOMAINS_TO_TEST = [{"host": "api.internal.contoso.com", "port": 443}]
-PRIVATE_DNS_ZONE = "internal.contoso.com"
-NCC_DOMAIN = "internal.contoso.com"
+DOMAINS_TO_TEST = [{"host": "api.internal.yourdomain.com", "port": 443}]
+PRIVATE_DNS_ZONE = "internal.yourdomain.com"
+NCC_DOMAIN = "internal.yourdomain.com"
 EXPECTED_PRIVATE_IP_PREFIX = "10.0"
 
 # Download with authentication

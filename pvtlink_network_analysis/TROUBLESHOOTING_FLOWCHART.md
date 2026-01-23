@@ -59,8 +59,8 @@ az network private-dns record-set a add-record \
 **Step 2: Verify Domain Name Spelling**
 - Check for typos in your DOMAINS_TO_TEST configuration
 - Ensure domain ends with your DNS zone suffix
-- Example: If zone is `internal.contoso.com`
-  - ✅ Correct: `api.internal.contoso.com`
+- Example: If zone is `internal.yourdomain.com`
+  - ✅ Correct: `api.internal.yourdomain.com`
   - ❌ Wrong: `api.internal.contos.com` (typo)
 
 ---
@@ -120,8 +120,8 @@ Overall Status: ❌ PRIVATE LINK NOT WORKING
 **Verify in Diagnostic Output:**
 ```
 Your Configuration:
-  Private DNS Zone:     internal.contoso.com
-  NCC Domain:           internal.contoso.com
+  Private DNS Zone:     internal.yourdomain.com
+  NCC Domain:           internal.yourdomain.com
 ```
 
 **These MUST match EXACTLY (character for character, case-sensitive)**
@@ -141,11 +141,11 @@ Your Configuration:
 
 **Common Mistakes:**
 ```
-DNS Zone:  internal.contoso.com
-NCC:       contoso.com              ❌ Wrong (missing subdomain)
+DNS Zone:  internal.yourdomain.com
+NCC:       yourdomain.com              ❌ Wrong (missing subdomain)
 NCC:       https://internal...      ❌ Wrong (has protocol)
-NCC:       *.internal.contoso.com   ❌ Wrong (has wildcard)
-NCC:       api.internal.contoso.com ❌ Wrong (specific hostname)
+NCC:       *.internal.yourdomain.com   ❌ Wrong (has wildcard)
+NCC:       api.internal.yourdomain.com ❌ Wrong (specific hostname)
 ```
 
 ---
@@ -284,17 +284,17 @@ print(f"Egress IP: {egress_ip}")
 
 **CORRECT Format:**
 ```
-internal.contoso.com
+internal.yourdomain.com
 ```
 
 **INCORRECT Formats:**
 ```
-https://internal.contoso.com       ❌ No protocol
-http://internal.contoso.com        ❌ No protocol
-*.internal.contoso.com             ❌ No wildcards
-api.internal.contoso.com           ❌ No specific hostname
-internal.contoso.com/              ❌ No trailing slash
-internal.contoso.com:443           ❌ No port
+https://internal.yourdomain.com       ❌ No protocol
+http://internal.yourdomain.com        ❌ No protocol
+*.internal.yourdomain.com             ❌ No wildcards
+api.internal.yourdomain.com           ❌ No specific hostname
+internal.yourdomain.com/              ❌ No trailing slash
+internal.yourdomain.com:443           ❌ No port
 ```
 
 **Rule:** Enter ONLY the DNS zone suffix, nothing else.
