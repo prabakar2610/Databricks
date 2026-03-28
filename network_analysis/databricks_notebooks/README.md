@@ -1,6 +1,6 @@
 # Databricks Notebooks - Network Diagnostics
 
-Network diagnostic scripts designed to run in **Azure Databricks Notebooks**.
+Network diagnostic scripts designed to run in **Azure Databricks Notebooks** (Python cells or **`%sh`** on cluster compute).
 
 ---
 
@@ -13,6 +13,7 @@ Each script has its own folder with detailed README and usage instructions.
 | **Private Link Diagnostics** | Comprehensive Private Link connectivity testing | ~2 min | [📖 README](private_link_diagnostics/README.md) |
 | **DNS Diagnostics** | DNS resolution and configuration validation | ~30 sec | [📖 README](dns_diagnostics/README.md) |
 | **Serverless Diagnostics** | Serverless compute networking validation | ~1 min | [📖 README](serverless_diagnostics/README.md) |
+| **Cluster mTLS Diagnostics** | Cluster TLS/mTLS config + live handshake checks (Bash) | ~2–5 min | [📖 README](mtls_cluster_diagnostics/README.md) |
 
 ---
 
@@ -53,6 +54,17 @@ exec(requests.get("https://raw.githubusercontent.com/prabakar2610/Databricks/mas
 
 ---
 
+### **mTLS / TLS parity across clusters**
+```bash
+%sh
+curl -fsSL -o /tmp/mtls_cluster_diag.sh \
+  https://raw.githubusercontent.com/prabakar2610/Databricks/master/network_analysis/databricks_notebooks/mtls_cluster_diagnostics/script.sh
+bash /tmp/mtls_cluster_diag.sh mtls-endpoint.example.com 443 /path/to/client.crt /path/to/client.key /path/to/ca.crt
+```
+[📖 Full Documentation](mtls_cluster_diagnostics/README.md)
+
+---
+
 ## 📊 When to Use Each Script
 
 | Problem | Use This Script |
@@ -63,6 +75,7 @@ exec(requests.get("https://raw.githubusercontent.com/prabakar2610/Databricks/mas
 | Serverless can't reach storage | [Serverless Diagnostics](serverless_diagnostics/) |
 | Package installs failing | [Serverless Diagnostics](serverless_diagnostics/) |
 | Control plane connection issues | [DNS Diagnostics](dns_diagnostics/) |
+| mTLS or HTTPS differs between clusters / pools | [Cluster mTLS Diagnostics](mtls_cluster_diagnostics/) |
 
 ---
 
@@ -84,6 +97,6 @@ exec(requests.get("https://raw.githubusercontent.com/prabakar2610/Databricks/mas
 
 ---
 
-**Version:** 4.0  
-**Last Updated:** 2026-01-24  
+**Version:** 4.1  
+**Last Updated:** 2026-03-28  
 **Organization:** Individual folders with dedicated READMEs

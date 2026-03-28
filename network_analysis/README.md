@@ -9,7 +9,7 @@ Comprehensive, modular network diagnostic tools for Azure Databricks.
 
 ```
 network_analysis/
-├── databricks_notebooks/              # Python scripts for Databricks Notebooks
+├── databricks_notebooks/              # Scripts for Databricks Notebooks (%python or %sh)
 │   ├── private_link_diagnostics/      ⭐ Comprehensive Private Link testing
 │   │   ├── script.py
 │   │   └── README.md                  📖 Complete usage guide
@@ -18,6 +18,9 @@ network_analysis/
 │   │   └── README.md                  📖 Complete usage guide
 │   ├── serverless_diagnostics/        Serverless compute networking
 │   │   ├── script.py
+│   │   └── README.md                  📖 Complete usage guide
+│   ├── mtls_cluster_diagnostics/      Cluster mTLS / TLS config + live checks (Bash)
+│   │   ├── script.sh
 │   │   └── README.md                  📖 Complete usage guide
 │   └── README.md                      Overview of all Databricks scripts
 │
@@ -49,6 +52,7 @@ network_analysis/
 | Serverless can't reach storage | [databricks_notebooks/serverless_diagnostics/](databricks_notebooks/serverless_diagnostics/) | [📖](databricks_notebooks/serverless_diagnostics/README.md) |
 | Cluster launch failures | [azure_cli_scripts/classic_compute_validation/](azure_cli_scripts/classic_compute_validation/) | [📖](azure_cli_scripts/classic_compute_validation/README.md) |
 | Compare VM vs Databricks connectivity | [azure_cli_scripts/private_link_validation/](azure_cli_scripts/private_link_validation/) | [📖](azure_cli_scripts/private_link_validation/README.md) |
+| mTLS / TLS differs between clusters | [databricks_notebooks/mtls_cluster_diagnostics/](databricks_notebooks/mtls_cluster_diagnostics/) | [📖](databricks_notebooks/mtls_cluster_diagnostics/README.md) |
 
 ### **By Environment**
 
@@ -104,6 +108,19 @@ chmod +x check.sh
 
 ---
 
+### **Example 4: Cluster mTLS / TLS diagnostics (`%sh`)**
+
+```bash
+# In Databricks notebook — download then run on cluster
+curl -fsSL -o /tmp/mtls_cluster_diag.sh \
+  https://raw.githubusercontent.com/prabakar2610/Databricks/master/network_analysis/databricks_notebooks/mtls_cluster_diagnostics/script.sh
+bash /tmp/mtls_cluster_diag.sh mtls-endpoint.example.com 443 /etc/ssl/client.crt /etc/ssl/client.key /etc/ssl/ca.crt
+```
+
+📖 [Full Guide](databricks_notebooks/mtls_cluster_diagnostics/README.md)
+
+---
+
 ## 📊 Script Comparison Matrix
 
 | Script | Run From | Time | Best For | README |
@@ -113,6 +130,7 @@ chmod +x check.sh
 | **Serverless Diagnostics** | Databricks | 1 min | Serverless networking | [📖](databricks_notebooks/serverless_diagnostics/README.md) |
 | **Private Link Validation** | Azure VM | 2 min | Infrastructure comparison | [📖](azure_cli_scripts/private_link_validation/README.md) |
 | **Classic Compute Validation** | Azure CLI | 1 min | VNet injection validation | [📖](azure_cli_scripts/classic_compute_validation/README.md) |
+| **Cluster mTLS Diagnostics** | Databricks `%sh` | 2–5 min | mTLS/TLS parity across clusters | [📖](databricks_notebooks/mtls_cluster_diagnostics/README.md) |
 
 ---
 
@@ -191,6 +209,15 @@ Follow the usage instructions in the specific README.
 
 ---
 
+### **Workflow 4: mTLS / TLS Works on One Cluster Only**
+
+1. **Cluster mTLS Diagnostics** ([📖](databricks_notebooks/mtls_cluster_diagnostics/README.md))
+   - Run on both clusters with the same target host and cert paths; save `/tmp/mtls_diag_<hostname>.txt` to DBFS
+2. **Diff outputs** locally or in a notebook to spot Java/OpenSSL, proxy, Spark SSL, truststore, or handshake differences
+3. **DNS / Private Link** — if TCP fails on one side only, use [DNS Diagnostics](databricks_notebooks/dns_diagnostics/README.md) and [Private Link Diagnostics](databricks_notebooks/private_link_diagnostics/README.md)
+
+---
+
 ## 🎨 Design Philosophy
 
 ### **Why Individual Folders?**
@@ -244,7 +271,13 @@ Each script folder contains a complete README with:
 
 ---
 
-## ✨ What's New in v4.0
+## ✨ What's New
+
+### v4.1 (2026-03-28)
+
+- ✅ **Cluster mTLS Diagnostics** — [`databricks_notebooks/mtls_cluster_diagnostics/`](databricks_notebooks/mtls_cluster_diagnostics/) Bash script for config collection and active TLS/mTLS checks; compare outputs across clusters
+
+### v4.0
 
 **Major Reorganization:**
 - ✅ Each script in its own folder
@@ -260,7 +293,7 @@ Each script folder contains a complete README with:
 
 ---
 
-**Version:** 4.0  
-**Last Updated:** 2026-01-24  
+**Version:** 4.1  
+**Last Updated:** 2026-03-28  
 **Organization:** Individual folders with comprehensive READMEs  
 **Maintained by:** Network Diagnostics Team
